@@ -1,4 +1,5 @@
 mod config;
+mod docs;
 mod error;
 mod handlers;
 mod models;
@@ -8,14 +9,20 @@ mod services;
 
 use crate::config::Config;
 use crate::routes::auth_routes::auth_routes;
-use axum::http::{
-    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
-    Method,
+use axum::{
+    http::{
+        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+        Method,
+    },
+    Router,
 };
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
+use crate::docs::ApiDoc;
 
 #[tokio::main]
 async fn main() {
@@ -46,8 +53,14 @@ async fn main() {
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE])
         .allow_origin(Any);
     
+    // Gerar documentação OpenAPI
+    let openapi = ApiDoc::openapi();
+    
     // Configurar rotas
-    let app = auth_routes(Arc::new(pool)).layer(cors);
+    let app = Router::new()
+        .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", openapi))
+        .merge(auth_routes(Arc::new(pool)))
+        .layer(cors);
     
     // Iniciar servidor
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], config.port));

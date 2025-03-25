@@ -4,6 +4,15 @@ Backend do projeto Troca Livros, feito em Rust com o framework Axum.
 
 Backend do projeto **Troca Livros**, desenvolvido em **Rust** utilizando o framework **Axum**.
 
+## 📚 Documentação da API
+
+A documentação da API está disponível através do Swagger UI:
+
+- **URL**: http://localhost:50001/docs
+- **OpenAPI JSON**: http://localhost:50001/api-docs/openapi.json
+
+A documentação inclui todos os endpoints disponíveis, modelos de dados, parâmetros de requisição e respostas.
+
 ---
 
 ## 🛠 Configuração do Banco de Dados com Docker
