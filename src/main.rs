@@ -8,7 +8,9 @@ mod routes;
 mod services;
 
 use crate::config::Config;
+use crate::docs::ApiDoc;
 use crate::routes::auth_routes::auth_routes;
+use crate::routes::google_book_routes::google_book_routes;
 use axum::{
     http::{
         header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
@@ -22,13 +24,12 @@ use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-use crate::docs::ApiDoc;
 
 #[tokio::main]
 async fn main() {
     // Carregar variáveis de ambiente
     dotenv::dotenv().ok();
-    
+
     // Configurar logging
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
@@ -36,38 +37,39 @@ async fn main() {
         ))
         .with(tracing_subscriber::fmt::layer())
         .init();
-    
+
     // Carregar configuração
     let config = Config::from_env().expect("Falha ao carregar configuração");
-    
+
     // Configurar pool de conexão com o banco de dados
     let pool = PgPoolOptions::new()
         .max_connections(10)
         .connect(&config.database_url)
         .await
         .expect("Falha ao conectar ao banco de dados");
-    
+
     // Configurar CORS
     let cors = CorsLayer::new()
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE])
         .allow_origin(Any);
-    
+
     // Gerar documentação OpenAPI
     let openapi = ApiDoc::openapi();
-    
+
     // Configurar rotas
     let app = Router::new()
         .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", openapi))
         .merge(auth_routes(Arc::new(pool)))
+        .merge(google_book_routes())
         .layer(cors);
-    
+
     // Iniciar servidor
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], config.port));
     tracing::info!("Servidor iniciado em {}", addr);
-    
+
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
         .unwrap();
-} 
+}
