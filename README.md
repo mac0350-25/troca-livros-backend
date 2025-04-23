@@ -85,3 +85,50 @@ A documentação da API está disponível através do Swagger UI:
 - **OpenAPI JSON**: http://localhost:50001/api-docs/openapi.json
 
 A documentação inclui todos os endpoints disponíveis, modelos de dados, parâmetros de requisição e respostas.
+
+---
+
+## 🧪 Executando Testes e Cobertura
+
+### 📌 Pré-requisitos
+- Rust e Cargo instalados
+- Para cobertura: instale a ferramenta Tarpaulin:
+  ```bash
+   cargo install cargo-tarpaulin
+  ```
+
+### 🧪 Executando Testes
+Para rodar todos os testes do projeto:
+```bash
+cargo test
+```
+
+Para executar um teste específico:
+```bash
+cargo test nome_do_teste
+```
+
+Para executar todos os testes de um módulo específico:
+```bash
+cargo test nome_do_modulo
+```
+
+Exemplo:
+```bash
+# Executar testes do serviço de autenticação
+cargo test services::auth_service_test
+
+# Executar testes do serviço de consulta ao Google Books
+cargo test services::google_book_service_test::tests
+```
+
+### 📊 Gerando Relatório de Cobertura
+Para verificar a cobertura de testes:
+
+2. Gere o relatório de cobertura em HTML:
+   ```bash
+   cargo tarpaulin --out Html
+   ```
+
+3. Abra o relatório no navegador:
+   O relatório será gerado no arquivo `tarpaulin-report.html`. Abra o arquivo em um navegador para visualizar a cobertura detalhada por arquivo e linha.
