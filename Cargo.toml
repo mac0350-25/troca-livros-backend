@@ -1,7 +1,15 @@
 [package]
-name = "auth-api"
+name = "troca-livros-api"
 version = "0.1.0"
 edition = "2021"
+
+[lib]
+name = "troca_livros_api"
+path = "src/lib.rs"
+
+[[bin]]
+name = "troca-livros-api"
+path = "src/main.rs"
 
 [dependencies]
 axum = "0.6.20"
@@ -27,6 +35,7 @@ once_cell = "1.17.1"
 
 [dev-dependencies]
 mockall = "0.11.4"
+reqwest = { version = "0.12.15", features = ["json"] }
 
 [profile.dev]
 debug = true
