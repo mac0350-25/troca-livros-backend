@@ -92,10 +92,30 @@ A documentação inclui todos os endpoints disponíveis, modelos de dados, parâ
 
 ### 📌 Pré-requisitos
 - Rust e Cargo instalados
+- Docker e Docker Compose instalados (para o banco de dados de testes)
 - Para cobertura: instale a ferramenta Tarpaulin:
   ```bash
    cargo install cargo-tarpaulin
   ```
+
+### 🏦 Banco de Dados para Testes
+Para executar os testes, é necessário ter o banco de dados de testes em execução:
+
+1. Certifique-se de que as variáveis de ambiente para o banco de testes estão configuradas no arquivo `.env`
+2. Inicie o banco de dados de testes junto com o banco principal:
+   ```sh
+   docker compose up -d --build
+   ```
+3. Verifique se o container de testes está rodando:
+   ```sh
+   docker ps
+   ```
+   Você deverá ver um container chamado `troca-livros-postgres-test` na lista.
+
+4. Para acessar o banco de dados de testes:
+   ```sh
+   docker exec -it troca-livros-postgres-test psql -U admin -d test_db
+   ```
 
 ### 🧪 Executando Testes
 Para rodar todos os testes do projeto:
