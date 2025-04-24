@@ -1,4 +1,5 @@
 use std::net::TcpListener;
+use troca_livros_api::app;
 
 pub struct TestApp {
     pub port: u16,
@@ -32,12 +33,12 @@ pub async fn setup_test_app() -> TestApp {
     let port = listener.local_addr().unwrap().port();
 
     // Configurar rotas sem Swagger UI (não necessário para testes)
-    let app = troca_livros_api::create_app(&test_db_url, false).await;
+    let created_app = app::create_app(&test_db_url).await;
 
     // Iniciar o servidor em uma nova thread
     let server = axum::Server::from_tcp(listener)
         .expect("Falha ao criar servidor a partir do listener")
-        .serve(app.into_make_service());
+        .serve(created_app.into_make_service());
 
     tokio::spawn(server);
 

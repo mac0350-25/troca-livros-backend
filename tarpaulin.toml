@@ -7,7 +7,5 @@ exclude-files = [
     "src/docs/*"
 ]
 
-skip-clean=true
-
 # Opções de saída 
 out = ["Html"]

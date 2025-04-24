@@ -1,3 +1,4 @@
+pub mod app;
 mod config;
 mod docs;
 mod error;
@@ -8,9 +9,11 @@ mod routes;
 mod services;
 
 use crate::config::Config;
+use std::net::{SocketAddr, TcpListener};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
+#[allow(dead_code)]
 async fn main() {
     // Carregar variáveis de ambiente
     dotenv::dotenv().ok();
@@ -26,13 +29,11 @@ async fn main() {
     // Carregar configuração
     let config = Config::from_env().expect("Falha ao carregar configuração");
 
-    // Criar o servidor
-    let (listener, app) = troca_livros_api::create_server(
-        &config.database_url,
-        config.port,
-        true, // Habilitar Swagger UI
-    )
-    .await;
+    let app = app::create_app(&config.database_url).await;
+
+    // Configura o listener na porta especificada
+    let listener = TcpListener::bind(SocketAddr::from(([0, 0, 0, 0], config.port)))
+        .expect("Falha ao vincular à porta");
 
     // Iniciar servidor
     tracing::info!("Servidor iniciado em {}", listener.local_addr().unwrap());

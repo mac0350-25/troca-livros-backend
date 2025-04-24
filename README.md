@@ -145,10 +145,10 @@ cargo test services::google_book_service_test::tests
 ### 📊 Gerando Relatório de Cobertura
 Para verificar a cobertura de testes:
 
-2. Gere o relatório de cobertura em HTML:
+1. Gere o relatório de cobertura em HTML:
    ```bash
-   cargo tarpaulin --out Html
+   cargo tarpaulin --config tarpaulin.toml
    ```
 
-3. Abra o relatório no navegador:
+2. Abra o relatório no navegador:
    O relatório será gerado no arquivo `tarpaulin-report.html`. Abra o arquivo em um navegador para visualizar a cobertura detalhada por arquivo e linha.

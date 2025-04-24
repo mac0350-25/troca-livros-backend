@@ -2,7 +2,6 @@ use crate::error::AppError;
 use crate::models::book::GoogleBookDto;
 use reqwest::Client;
 use serde_json::Value;
-
 pub trait GoogleBookService: Send + Sync {
     fn search_books<'a>(
         &'a self,
@@ -32,10 +31,9 @@ impl GoogleBookService for GoogleBookServiceImpl {
         Box<dyn std::future::Future<Output = Result<Vec<GoogleBookDto>, AppError>> + Send + 'a>,
     > {
         Box::pin(async move {
-            let url = format!(
-                "https://www.googleapis.com/books/v1/volumes?q={}&fields=items(id,volumeInfo(title,authors,publisher,publishedDate,description,pageCount,imageLinks/thumbnail))",
-                query
-            );
+            let mut url = String::from("https://www.googleapis.com/books/v1/volumes?q=");
+            url.push_str(&query);
+            url.push_str("&fields=items(id,volumeInfo(title,authors,publisher,publishedDate,description,pageCount,imageLinks/thumbnail))");
 
             let response = self.client.get(&url).send().await.map_err(|e| {
                 AppError::InternalServerError(format!("Erro ao buscar livros: {}", e))
@@ -59,35 +57,40 @@ impl GoogleBookService for GoogleBookServiceImpl {
                     let volume_info = &item["volumeInfo"];
 
                     // Extrair informações
-                    let title = volume_info["title"]
-                        .as_str()
-                        .unwrap_or_default()
-                        .to_string();
+                    let title = volume_info["title"].as_str();
+                    let title = title.unwrap_or_default().to_string();
 
                     // Processar autores
-                    let authors = if let Some(authors_array) = volume_info["authors"].as_array() {
-                        let authors_vec: Vec<String> = authors_array
-                            .iter()
-                            .filter_map(|a| a.as_str().map(|s| s.to_string()))
-                            .collect();
-                        if authors_vec.is_empty() {
-                            None
-                        } else {
+                    let authors = match volume_info["authors"].as_array() {
+                        Some(authors_array) => {
+                            let mut authors_vec: Vec<String> = Vec::new();
+                            for author in authors_array {
+                                if let Some(author_str) = author.as_str() {
+                                    authors_vec.push(author_str.to_string());
+                                }
+                            }
                             Some(authors_vec.join(", "))
                         }
-                    } else {
-                        None
+                        None => None,
                     };
 
                     let publisher = volume_info["publisher"].as_str().map(|s| s.to_string());
-                    let published_date =
-                        volume_info["publishedDate"].as_str().map(|s| s.to_string());
+
+                    let published_date = match volume_info["publishedDate"].as_str() {
+                        Some(date_str) => Some(date_str.to_string()),
+                        None => None,
+                    };
+
                     let description = volume_info["description"].as_str().map(|s| s.to_string());
                     let page_count = volume_info["pageCount"].as_i64().map(|n| n as i32);
 
-                    let image_url = volume_info["imageLinks"]["thumbnail"]
-                        .as_str()
-                        .map(|s| s.to_string());
+                    let image_url = match volume_info.get("imageLinks") {
+                        Some(image_links) => match image_links.get("thumbnail") {
+                            Some(thumbnail) => thumbnail.as_str().map(|s| s.to_string()),
+                            None => None,
+                        },
+                        None => None,
+                    };
 
                     books.push(GoogleBookDto {
                         google_id,

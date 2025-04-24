@@ -1,12 +1,3 @@
-pub mod config;
-pub mod docs;
-pub mod error;
-pub mod handlers;
-pub mod models;
-pub mod repositories;
-pub mod routes;
-pub mod services;
-
 use axum::{
     http::{
         header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
@@ -15,7 +6,6 @@ use axum::{
     Router,
 };
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use std::net::{SocketAddr, TcpListener};
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
@@ -40,7 +30,7 @@ pub async fn create_database_pool(database_url: &str) -> Arc<PgPool> {
 ///
 /// Esta função recebe a URL do banco de dados e configura o aplicativo
 /// É usada tanto pela aplicação principal quanto pelos testes
-pub async fn create_app(database_url: &str, with_swagger: bool) -> Router {
+pub async fn create_app(database_url: &str) -> Router {
     let pool = create_database_pool(database_url).await;
 
     // Configurar CORS
@@ -55,30 +45,8 @@ pub async fn create_app(database_url: &str, with_swagger: bool) -> Router {
         .merge(google_book_routes())
         .layer(cors);
 
-    // Adicionar documentação Swagger se solicitado
-    if with_swagger {
-        let openapi = ApiDoc::openapi();
-        app = app.merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", openapi));
-    }
+    let openapi = ApiDoc::openapi();
+    app = app.merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", openapi));
 
     app
-}
-
-/// Cria e configura o servidor completo, incluindo o pool de banco de dados
-/// e o listener na porta especificada
-///
-/// Retorna o listener configurado e o aplicativo
-pub async fn create_server(
-    database_url: &str,
-    port: u16,
-    with_swagger: bool,
-) -> (TcpListener, Router) {
-    // Cria o aplicativo
-    let app = create_app(database_url, with_swagger).await;
-
-    // Configura o listener na porta especificada
-    let listener = TcpListener::bind(SocketAddr::from(([0, 0, 0, 0], port)))
-        .expect("Falha ao vincular à porta");
-
-    (listener, app)
 }

@@ -10,16 +10,16 @@ use thiserror::Error;
 pub enum AppError {
     #[error("Erro de autenticação: {0}")]
     AuthError(String),
-    
+
     #[error("Erro de validação: {0}")]
     ValidationError(String),
-    
+
     #[error("Erro de banco de dados: {0}")]
     DatabaseError(String),
-    
+
     #[error("Recurso não encontrado: {0}")]
     NotFoundError(String),
-    
+
     #[error("Erro interno do servidor: {0}")]
     InternalServerError(String),
 }
@@ -48,8 +48,10 @@ impl IntoResponse for AppError {
 impl From<sqlx::Error> for AppError {
     fn from(error: sqlx::Error) -> Self {
         match error {
-            sqlx::Error::RowNotFound => AppError::NotFoundError("Registro não encontrado".to_string()),
+            sqlx::Error::RowNotFound => {
+                AppError::NotFoundError("Registro não encontrado".to_string())
+            }
             _ => AppError::DatabaseError(error.to_string()),
         }
     }
-} 
+}
