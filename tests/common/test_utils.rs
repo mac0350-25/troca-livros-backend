@@ -1,5 +1,8 @@
+use reqwest::Client;
+use serde_json::{json, Value};
 use std::net::TcpListener;
 use troca_livros_api::app;
+use uuid::Uuid;
 
 pub struct TestApp {
     pub port: u16,
@@ -43,4 +46,57 @@ pub async fn setup_test_app() -> TestApp {
     tokio::spawn(server);
 
     TestApp { port }
+}
+
+/// Cria um usuário de teste e retorna o token de autenticação
+///
+/// Esta função:
+/// 1. Registra um novo usuário (se necessário)
+/// 2. Faz login para obter o token JWT
+/// 3. Retorna o token para ser usado em requisições autenticadas
+pub async fn get_auth_token(app: &TestApp) -> String {
+    let client = Client::new();
+
+    // Criar credenciais únicas usando UUID para garantir unicidade absoluta
+    // mesmo quando chamado no mesmo milissegundo
+    let uuid = Uuid::new_v4().to_string();
+    let email = format!("auth_test_{}@example.com", uuid);
+    let password = "Senha@123";
+    let name = format!("Usuário de Teste {}", uuid);
+
+    // Registrar usuário
+    let register_response = client
+        .post(&format!("http://localhost:{}/api/auth/register", app.port))
+        .json(&json!({
+            "name": name,
+            "email": email,
+            "password": password
+        }))
+        .send()
+        .await
+        .expect("Falha ao registrar usuário de teste");
+
+    assert_eq!(register_response.status(), reqwest::StatusCode::CREATED);
+
+    // Fazer login
+    let login_response = client
+        .post(&format!("http://localhost:{}/api/auth/login", app.port))
+        .json(&json!({
+            "email": email,
+            "password": password
+        }))
+        .send()
+        .await
+        .expect("Falha ao autenticar usuário de teste");
+
+    let login_body: Value = login_response
+        .json()
+        .await
+        .expect("Falha ao ler resposta de login");
+
+    // Extrair token
+    login_body["data"]["access_token"]
+        .as_str()
+        .expect("Token não encontrado na resposta")
+        .to_string()
 }

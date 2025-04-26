@@ -1,18 +1,20 @@
 mod common;
 
-use crate::common::test_utils::setup_test_app;
-use reqwest::StatusCode;
+use crate::common::test_utils::{get_auth_token, setup_test_app};
+use reqwest::{header, StatusCode};
 use serde_json::{json, Value};
 
 #[tokio::test]
 async fn test_search_books_success() {
-    // Arrange - Configurar o aplicativo de teste
+    // Arrange - Configurar o aplicativo de teste e autenticar
     let app = setup_test_app().await;
+    let token = get_auth_token(&app).await;
     let client = reqwest::Client::new();
 
     // Act - Buscar livros com um termo de busca válido
     let response = client
         .post(&format!("http://localhost:{}/api/books/search", app.port))
+        .header(header::AUTHORIZATION, format!("Bearer {}", token))
         .json(&json!({
             "query": "Rust Programming"
         }))
@@ -48,14 +50,82 @@ async fn test_search_books_success() {
 }
 
 #[tokio::test]
+async fn test_search_books_without_authentication() {
+    // Arrange
+    let app = setup_test_app().await;
+    let client = reqwest::Client::new();
+
+    // Act - Buscar livros sem fornecer token de autenticação
+    let response = client
+        .post(&format!("http://localhost:{}/api/books/search", app.port))
+        .json(&json!({
+            "query": "Clean Code"
+        }))
+        .send()
+        .await
+        .expect("Falha ao enviar requisição");
+
+    // Assert - Verificar que a requisição falhou por falta de autenticação
+    let status = response.status();
+    let body: Value = response
+        .json()
+        .await
+        .expect("Falha ao ler corpo da resposta");
+
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(body["error"]["status"], 401);
+    assert!(body["error"]["message"]
+        .as_str()
+        .unwrap()
+        .contains("Token de autenticação ausente"));
+}
+
+#[tokio::test]
+async fn test_search_books_with_invalid_token() {
+    // Arrange
+    let app = setup_test_app().await;
+    let client = reqwest::Client::new();
+
+    // Token inválido
+    let invalid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+
+    // Act - Buscar livros com token inválido
+    let response = client
+        .post(&format!("http://localhost:{}/api/books/search", app.port))
+        .header(header::AUTHORIZATION, format!("Bearer {}", invalid_token))
+        .json(&json!({
+            "query": "Clean Code"
+        }))
+        .send()
+        .await
+        .expect("Falha ao enviar requisição");
+
+    // Assert - Verificar que a requisição falhou por token inválido
+    let status = response.status();
+    let body: Value = response
+        .json()
+        .await
+        .expect("Falha ao ler corpo da resposta");
+
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(body["error"]["status"], 401);
+    assert!(body["error"]["message"]
+        .as_str()
+        .unwrap()
+        .contains("Token inválido"));
+}
+
+#[tokio::test]
 async fn test_search_books_empty_query() {
     // Arrange
     let app = setup_test_app().await;
+    let token = get_auth_token(&app).await;
     let client = reqwest::Client::new();
 
     // Act - Enviar uma consulta vazia
     let response = client
         .post(&format!("http://localhost:{}/api/books/search", app.port))
+        .header(header::AUTHORIZATION, format!("Bearer {}", token))
         .json(&json!({
             "query": ""
         }))
@@ -82,11 +152,13 @@ async fn test_search_books_empty_query() {
 async fn test_search_books_specific_book() {
     // Arrange
     let app = setup_test_app().await;
+    let token = get_auth_token(&app).await;
     let client = reqwest::Client::new();
 
     // Act - Buscar um livro específico com termos mais específicos
     let response = client
         .post(&format!("http://localhost:{}/api/books/search", app.port))
+        .header(header::AUTHORIZATION, format!("Bearer {}", token))
         .json(&json!({
             "query": "Clean Code: A Handbook of Agile Software Craftsmanship Robert Martin"
         }))
@@ -127,12 +199,14 @@ async fn test_search_books_specific_book() {
 async fn test_search_books_nonexistent_title() {
     // Arrange
     let app = setup_test_app().await;
+    let token = get_auth_token(&app).await;
     let client = reqwest::Client::new();
 
     // Act - Buscar um título improvável de existir
     let unique_query = format!("TítuloMuitoImprovável{}", chrono::Utc::now().timestamp());
     let response = client
         .post(&format!("http://localhost:{}/api/books/search", app.port))
+        .header(header::AUTHORIZATION, format!("Bearer {}", token))
         .json(&json!({
             "query": unique_query
         }))
@@ -162,11 +236,13 @@ async fn test_search_books_nonexistent_title() {
 async fn test_search_books_with_author_filter() {
     // Arrange
     let app = setup_test_app().await;
+    let token = get_auth_token(&app).await;
     let client = reqwest::Client::new();
 
     // Act - Buscar livros de um autor específico
     let response = client
         .post(&format!("http://localhost:{}/api/books/search", app.port))
+        .header(header::AUTHORIZATION, format!("Bearer {}", token))
         .json(&json!({
             "query": "author:Martin Fowler"
         }))
