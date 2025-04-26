@@ -3,6 +3,7 @@ mod config;
 mod docs;
 mod error;
 mod handlers;
+mod middleware;
 mod models;
 mod repositories;
 mod routes;
@@ -37,6 +38,10 @@ async fn main() {
 
     // Iniciar servidor
     tracing::info!("Servidor iniciado em {}", listener.local_addr().unwrap());
+    tracing::info!(
+        "Swagger: {}",
+        format!("http://localhost:{}/docs", config.port)
+    );
 
     axum::Server::from_tcp(listener)
         .unwrap()

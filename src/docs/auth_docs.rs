@@ -9,7 +9,14 @@ use crate::models::user::{CreateUserDto, LoginUserDto, TokenResponse, UserRespon
 #[utoipa::path(
     post,
     path = "/api/auth/register",
-    request_body = CreateUserDto,
+    request_body(
+        content = CreateUserDto,
+        example = json!({
+            "name": "Usuário Teste",
+            "email": "usuario@teste.com",
+            "password": "senha123"
+        })
+    ),
     responses(
         (status = 201, description = "Usuário registrado com sucesso", body = UserResponse),
         (status = 400, description = "Dados de entrada inválidos"),
@@ -29,7 +36,13 @@ pub async fn register(_body: Json<CreateUserDto>) -> Result<Json<UserResponse>, 
 #[utoipa::path(
     post,
     path = "/api/auth/login",
-    request_body = LoginUserDto,
+    request_body(
+        content = LoginUserDto,
+        example = json!({
+            "email": "usuario@teste.com",
+            "password": "senha123"
+        })
+    ),
     responses(
         (status = 200, description = "Login realizado com sucesso", body = TokenResponse),
         (status = 401, description = "Credenciais inválidas"),
@@ -41,4 +54,4 @@ pub async fn register(_body: Json<CreateUserDto>) -> Result<Json<UserResponse>, 
 pub async fn login(_body: Json<LoginUserDto>) -> Result<Json<TokenResponse>, AppError> {
     // Esta função é apenas para documentação
     unimplemented!()
-} 
+}
