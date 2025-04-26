@@ -1,0 +1,11 @@
+# Arquivo de configuração do cargo-tarpaulin
+[all]
+
+# Exclui arquivos específicos da cobertura
+exclude-files = [
+    "src/main.rs",
+    "src/docs/*"
+]
+
+# Opções de saída 
+out = ["Html"]

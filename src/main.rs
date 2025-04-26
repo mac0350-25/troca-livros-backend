@@ -1,3 +1,4 @@
+pub mod app;
 mod config;
 mod docs;
 mod error;
@@ -8,24 +9,11 @@ mod routes;
 mod services;
 
 use crate::config::Config;
-use crate::docs::ApiDoc;
-use crate::routes::auth_routes::auth_routes;
-use crate::routes::google_book_routes::google_book_routes;
-use axum::{
-    http::{
-        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
-        Method,
-    },
-    Router,
-};
-use sqlx::postgres::PgPoolOptions;
-use std::sync::Arc;
-use tower_http::cors::{Any, CorsLayer};
+use std::net::{SocketAddr, TcpListener};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
 
 #[tokio::main]
+#[allow(dead_code)]
 async fn main() {
     // Carregar variáveis de ambiente
     dotenv::dotenv().ok();
@@ -41,34 +29,17 @@ async fn main() {
     // Carregar configuração
     let config = Config::from_env().expect("Falha ao carregar configuração");
 
-    // Configurar pool de conexão com o banco de dados
-    let pool = PgPoolOptions::new()
-        .max_connections(10)
-        .connect(&config.database_url)
-        .await
-        .expect("Falha ao conectar ao banco de dados");
+    let app = app::create_app(&config.database_url).await;
 
-    // Configurar CORS
-    let cors = CorsLayer::new()
-        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
-        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE])
-        .allow_origin(Any);
-
-    // Gerar documentação OpenAPI
-    let openapi = ApiDoc::openapi();
-
-    // Configurar rotas
-    let app = Router::new()
-        .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", openapi))
-        .merge(auth_routes(Arc::new(pool)))
-        .merge(google_book_routes())
-        .layer(cors);
+    // Configura o listener na porta especificada
+    let listener = TcpListener::bind(SocketAddr::from(([0, 0, 0, 0], config.port)))
+        .expect("Falha ao vincular à porta");
 
     // Iniciar servidor
-    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], config.port));
-    tracing::info!("Servidor iniciado em {}", addr);
+    tracing::info!("Servidor iniciado em {}", listener.local_addr().unwrap());
 
-    axum::Server::bind(&addr)
+    axum::Server::from_tcp(listener)
+        .unwrap()
         .serve(app.into_make_service())
         .await
         .unwrap();

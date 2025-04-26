@@ -1,6 +1,5 @@
 use async_trait::async_trait;
 use sqlx::PgPool;
-use uuid::Uuid;
 
 use crate::error::AppError;
 use crate::models::user::{CreateUserDto, User};
@@ -9,7 +8,6 @@ use crate::models::user::{CreateUserDto, User};
 pub trait UserRepository: Send + Sync + 'static {
     async fn create(&self, user: &CreateUserDto, hash_password: String) -> Result<User, AppError>;
     async fn find_by_email(&self, email: &str) -> Result<Option<User>, AppError>;
-    async fn find_by_id(&self, id: &Uuid) -> Result<Option<User>, AppError>;
 }
 
 pub struct PgUserRepository {
@@ -53,14 +51,4 @@ impl UserRepository for PgUserRepository {
 
         Ok(result)
     }
-
-    async fn find_by_id(&self, id: &Uuid) -> Result<Option<User>, AppError> {
-        let result = sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1")
-            .bind(id)
-            .fetch_optional(&self.pool)
-            .await
-            .map_err(AppError::from)?;
-
-        Ok(result)
-    }
-} 
+}
