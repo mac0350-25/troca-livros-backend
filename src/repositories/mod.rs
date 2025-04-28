@@ -1,13 +1,30 @@
+pub mod book_repository;
 pub mod user_repository;
 
 #[cfg(test)]
 pub mod user_repository_test;
 
 #[cfg(test)]
+pub mod book_repository_test;
+
+#[cfg(test)]
 pub mod test_helpers {
     use dotenv::dotenv;
     use sqlx::PgPool;
     use std::env;
+    use std::sync::Arc;
+    use tokio::sync::Mutex;
+
+    // Mutex para garantir que apenas um teste por vez acesse o banco
+    static TEST_MUTEX: tokio::sync::OnceCell<Arc<Mutex<()>>> = tokio::sync::OnceCell::const_new();
+
+    // Retorna um mutex para garantir a execução sequencial dos testes
+    pub async fn get_test_mutex() -> Arc<Mutex<()>> {
+        TEST_MUTEX
+            .get_or_init(|| async { Arc::new(Mutex::new(())) })
+            .await
+            .clone()
+    }
 
     // Configura e retorna um pool de conexão com o banco de dados de teste
     pub async fn get_test_db_pool() -> PgPool {
@@ -29,9 +46,13 @@ pub mod test_helpers {
         );
 
         // Conecta ao banco de dados de teste
-        PgPool::connect(&connection_string)
+        let pool = PgPool::connect(&connection_string)
             .await
-            .expect("Falha ao conectar ao banco de teste")
+            .expect("Falha ao conectar ao banco de teste");
+
+        clean_database(&pool).await;
+
+        pool
     }
 
     // Limpa todas as tabelas do banco de teste para garantir um estado inicial conhecido

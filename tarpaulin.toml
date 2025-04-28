@@ -1,6 +1,8 @@
 # Arquivo de configuração do cargo-tarpaulin
 [all]
 
+test-threads = 1
+
 # Exclui arquivos específicos da cobertura
 exclude-files = [
     "src/main.rs",

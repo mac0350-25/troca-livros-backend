@@ -29,8 +29,6 @@ pub async fn setup_test_app() -> TestApp {
     let test_db_url =
         std::env::var("TEST_DATABASE_URL").expect("TEST_DATABASE_URL não está definida");
 
-    println!("Conectando ao banco de teste: {}", test_db_url);
-
     // Encontrar uma porta disponível
     let listener = TcpListener::bind("127.0.0.1:0").expect("Falha ao vincular a porta aleatória");
     let port = listener.local_addr().unwrap().port();
@@ -54,6 +52,7 @@ pub async fn setup_test_app() -> TestApp {
 /// 1. Registra um novo usuário (se necessário)
 /// 2. Faz login para obter o token JWT
 /// 3. Retorna o token para ser usado em requisições autenticadas
+#[allow(dead_code)]
 pub async fn get_auth_token(app: &TestApp) -> String {
     let client = Client::new();
 
