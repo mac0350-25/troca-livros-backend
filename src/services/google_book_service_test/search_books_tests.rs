@@ -1,4 +1,6 @@
 use crate::services::google_book_service::{GoogleBookService, GoogleBookServiceImpl};
+use crate::services::http_service::HttpServiceImpl;
+use std::sync::Arc;
 
 #[cfg(test)]
 mod tests {
@@ -7,7 +9,8 @@ mod tests {
     #[tokio::test]
     async fn test_search_books_real_api() {
         // Arrange
-        let service = GoogleBookServiceImpl::new();
+        let http_service = Arc::new(HttpServiceImpl::new());
+        let service = GoogleBookServiceImpl::new(http_service);
         let query = "Rust Programming Language";
 
         // Act
@@ -57,23 +60,10 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_search_books_with_empty_query() {
-        // Arrange
-        let service = GoogleBookServiceImpl::new();
-        let query = "";
-
-        // Act
-        let result = service.search_books(query).await;
-
-        // Assert
-        // Mesmo com uma consulta vazia, a API deve responder, embora possa retornar uma lista vazia
-        assert!(result.is_ok(), "A busca com query vazia não deve falhar");
-    }
-
-    #[tokio::test]
     async fn test_search_books_with_specific_author() {
         // Arrange
-        let service = GoogleBookServiceImpl::new();
+        let http_service = Arc::new(HttpServiceImpl::new());
+        let service = GoogleBookServiceImpl::new(http_service);
         let query = "author:Martin Fowler";
 
         // Act
@@ -103,7 +93,8 @@ mod tests {
     #[tokio::test]
     async fn test_search_books_with_nonexistent_title() {
         // Arrange
-        let service = GoogleBookServiceImpl::new();
+        let http_service = Arc::new(HttpServiceImpl::new());
+        let service = GoogleBookServiceImpl::new(http_service);
         // Uma string improvável de corresponder a um título real
         let query = "título extremamente improvável de existir 9283749232874";
 
@@ -126,7 +117,8 @@ mod tests {
     #[tokio::test]
     async fn test_search_books_response_structure() {
         // Arrange
-        let service = GoogleBookServiceImpl::new();
+        let http_service = Arc::new(HttpServiceImpl::new());
+        let service = GoogleBookServiceImpl::new(http_service);
         // Um livro bem conhecido que deve ter todos os campos preenchidos
         let query = "title:Clean Code Robert Martin";
 

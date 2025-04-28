@@ -2,7 +2,7 @@ use crate::{
     error::AppError,
     models::user::CreateUserDto,
     repositories::{
-        test_helpers::{get_test_db_pool},
+        test_helpers::{get_test_db_pool, get_test_mutex},
         user_repository::{PgUserRepository, UserRepository},
     },
 };
@@ -18,6 +18,9 @@ async fn setup_test_repository() -> PgUserRepository {
 
 #[tokio::test]
 async fn test_create_user() {
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+
     let user_repository = setup_test_repository().await;
 
     let user = CreateUserDto {
@@ -42,6 +45,9 @@ async fn test_create_user() {
 
 #[tokio::test]
 async fn test_find_by_email() {
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+
     let user_repository = setup_test_repository().await;
 
     // Cria um usuário para teste
@@ -82,6 +88,9 @@ async fn test_find_by_email() {
 
 #[tokio::test]
 async fn test_email_exists() {
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+
     let user_repository = setup_test_repository().await;
 
     // Cria um usuário para teste
@@ -116,6 +125,9 @@ async fn test_email_exists() {
 
 #[tokio::test]
 async fn test_duplicate_email() {
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+
     let user_repository = setup_test_repository().await;
 
     // Cria um primeiro usuário

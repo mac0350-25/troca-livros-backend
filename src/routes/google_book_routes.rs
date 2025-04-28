@@ -4,12 +4,15 @@ use axum::{routing::post, Router};
 
 use crate::{
     handlers::google_book_handler::GoogleBookHandler, routes::protect_routes,
-    services::google_book_service::GoogleBookServiceImpl,
+    services::google_book_service::GoogleBookServiceImpl, services::http_service::HttpServiceImpl,
 };
 
 pub fn google_book_routes() -> Router {
+    // Serviço HTTP
+    let http_service = Arc::new(HttpServiceImpl::new());
+
     // Serviço do Google Books
-    let book_service = Arc::new(GoogleBookServiceImpl::new());
+    let book_service = Arc::new(GoogleBookServiceImpl::new(http_service));
 
     // Handler
     let book_handler = Arc::new(GoogleBookHandler::new(book_service));

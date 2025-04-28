@@ -1,7 +1,9 @@
 use crate::error::AppError;
 use crate::models::book::GoogleBookDto;
-use reqwest::Client;
+use crate::services::http_service::HttpService;
 use serde_json::Value;
+use std::sync::Arc;
+
 pub trait GoogleBookService: Send + Sync {
     fn search_books<'a>(
         &'a self,
@@ -19,14 +21,12 @@ pub trait GoogleBookService: Send + Sync {
 }
 
 pub struct GoogleBookServiceImpl {
-    client: Client,
+    http_service: Arc<dyn HttpService>,
 }
 
 impl GoogleBookServiceImpl {
-    pub fn new() -> Self {
-        Self {
-            client: Client::new(),
-        }
+    pub fn new(http_service: Arc<dyn HttpService>) -> Self {
+        Self { http_service }
     }
 
     // Função auxiliar para converter JSON em GoogleBookDto
@@ -95,13 +95,7 @@ impl GoogleBookService for GoogleBookServiceImpl {
             url.push_str(&query);
             url.push_str("&fields=items(id,volumeInfo(title,authors,publisher,publishedDate,description,pageCount,imageLinks/thumbnail))");
 
-            let response = self.client.get(&url).send().await.map_err(|e| {
-                AppError::InternalServerError(format!("Erro ao buscar livros: {}", e))
-            })?;
-
-            let data: Value = response.json().await.map_err(|e| {
-                AppError::InternalServerError(format!("Erro ao processar resposta: {}", e))
-            })?;
+            let data = self.http_service.get(&url).await?;
 
             let items = match data.get("items") {
                 Some(items) => items,
@@ -132,18 +126,14 @@ impl GoogleBookService for GoogleBookServiceImpl {
             url.push_str(&google_id);
             url.push_str("?fields=id,volumeInfo(title,authors,publisher,publishedDate,description,pageCount,imageLinks/thumbnail)");
 
-            let response = self.client.get(&url).send().await.map_err(|e| {
-                AppError::InternalServerError(format!("Erro ao buscar livro: {}", e))
-            })?;
-
-            if !response.status().is_success() {
-                let message = format!("Livro com ID {} não encontrado", google_id);
-                return Err(AppError::NotFoundError(message));
-            }
-
-            let data: Value = response.json().await.map_err(|e| {
-                AppError::InternalServerError(format!("Erro ao processar resposta: {}", e))
-            })?;
+            let data = match self.http_service.get(&url).await {
+                Ok(data) => data,
+                Err(AppError::NotFoundError(_)) => {
+                    let message = format!("Livro com ID {} não encontrado", google_id);
+                    return Err(AppError::NotFoundError(message));
+                }
+                Err(e) => return Err(e),
+            };
 
             // Converter dados em GoogleBookDto
             let book = self.convert_to_google_book_dto(&data);
