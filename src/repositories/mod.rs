@@ -1,11 +1,15 @@
 pub mod book_repository;
 pub mod user_repository;
+pub mod books_offered_repository;
 
 #[cfg(test)]
 pub mod user_repository_test;
 
 #[cfg(test)]
 pub mod book_repository_test;
+
+#[cfg(test)]
+pub mod books_offered_repository_test;
 
 #[cfg(test)]
 pub mod test_helpers {

@@ -5,7 +5,7 @@ pub mod find_by_id_test;
 
 use crate::models::book::GoogleBookDto;
 use crate::repositories::book_repository::PgBookRepository;
-use crate::repositories::test_helpers::{get_test_db_pool, clean_database};
+use crate::repositories::test_helpers::get_test_db_pool;
 
 
 async fn setup_test_repository() -> PgBookRepository {
@@ -13,7 +13,7 @@ async fn setup_test_repository() -> PgBookRepository {
     let pool = get_test_db_pool().await;
 
     // Limpa o banco de dados para garantir o isolamento dos testes
-    clean_database(&pool).await;
+    crate::repositories::test_helpers::clean_database(&pool).await;
 
     // Criamos o DatabasePool com o pool real
     PgBookRepository::new(pool)
