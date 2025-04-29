@@ -14,7 +14,7 @@ async fn test_find_book_by_google_id() {
     let book = create_test_book("test123", true);
 
     // Insere o livro no banco de dados
-    let _book_id = book_repository
+    let book_id = book_repository
         .create(&book)
         .await
         .expect("Falha ao criar livro");
@@ -34,22 +34,25 @@ async fn test_find_book_by_google_id() {
 
     let found_book = found_book.unwrap();
 
+    // Verifica se o ID do livro corresponde ao ID retornado pela criação
+    assert_eq!(found_book.id, book_id, "O ID do livro não corresponde ao ID retornado pela criação");
+
     // Verifica se os dados do livro encontrado correspondem aos dados inseridos
-    assert_eq!(found_book.google_id, book.google_id);
-    assert_eq!(found_book.title, book.title);
-    assert_eq!(found_book.authors, book.authors);
-    assert_eq!(found_book.publisher, book.publisher);
+    assert_eq!(found_book.book.google_id, book.google_id);
+    assert_eq!(found_book.book.title, book.title);
+    assert_eq!(found_book.book.authors, book.authors);
+    assert_eq!(found_book.book.publisher, book.publisher);
     // Comparação simplificada para published_date já que pode haver diferenças de formatação
-    assert!(found_book.published_date.is_some());
+    assert!(found_book.book.published_date.is_some());
     assert_eq!(
-        found_book.description.unwrap_or_default(),
+        found_book.book.description.unwrap_or_default(),
         book.description.unwrap_or_default()
     );
     assert_eq!(
-        found_book.image_url.unwrap_or_default(),
+        found_book.book.image_url.unwrap_or_default(),
         book.image_url.unwrap_or_default()
     );
-    assert_eq!(found_book.page_count, book.page_count);
+    assert_eq!(found_book.book.page_count, book.page_count);
 }
 
 #[tokio::test]

@@ -5,10 +5,17 @@ use async_trait::async_trait;
 use uuid::Uuid;
 use crate::error::AppError;
 
+// Estender GoogleBookDto para incluir o id do banco de dados
+#[derive(Debug, Clone)]
+pub struct BookWithId {
+    pub id: Uuid,
+    pub book: GoogleBookDto,
+}
+
 #[async_trait]
 pub trait BookRepository: Send + Sync + 'static {
     async fn create(&self, book: &GoogleBookDto) -> Result<Uuid, AppError>;
-    async fn find_by_google_id(&self, google_id: &str) -> Result<Option<GoogleBookDto>, AppError>;
+    async fn find_by_google_id(&self, google_id: &str) -> Result<Option<BookWithId>, AppError>;
     async fn find_by_id(&self, id: &str) -> Result<Option<GoogleBookDto>, AppError>;
 }
 
@@ -24,10 +31,11 @@ impl PgBookRepository {
 
 #[async_trait]
 impl BookRepository for PgBookRepository {
-    async fn find_by_google_id(&self, google_id: &str) -> Result<Option<GoogleBookDto>, AppError> {
+    async fn find_by_google_id(&self, google_id: &str) -> Result<Option<BookWithId>, AppError> {
         let result = sqlx::query!(
             r#"
             SELECT 
+                id,
                 google_id,
                 title,
                 author,
@@ -45,15 +53,18 @@ impl BookRepository for PgBookRepository {
         .await
         .map_err(|e| AppError::DatabaseError(e.to_string()))?;
 
-        Ok(result.map(|r| GoogleBookDto {
-            google_id: r.google_id.unwrap_or_default(),
-            title: r.title,
-            authors: Some(r.author),
-            publisher: r.publisher,
-            published_date: r.published_date.map(|d| d.to_string()),
-            description: Some(r.description),
-            image_url: Some(r.image_url),
-            page_count: r.page_count,
+        Ok(result.map(|r| BookWithId {
+            id: r.id,
+            book: GoogleBookDto {
+                google_id: r.google_id.unwrap_or_default(),
+                title: r.title,
+                authors: Some(r.author),
+                publisher: r.publisher,
+                published_date: r.published_date.map(|d| d.to_string()),
+                description: Some(r.description),
+                image_url: Some(r.image_url),
+                page_count: r.page_count,
+            }
         }))
     }
 

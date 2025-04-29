@@ -40,15 +40,18 @@ async fn test_find_by_google_id() {
 
     let found_book = found_book.unwrap();
 
+    // Verifica se o ID do livro corresponde ao ID retornado pela criação
+    assert_eq!(found_book.id, book_id, "O ID do livro não corresponde ao ID retornado pela criação");
+
     // Verifica se os dados do livro encontrado correspondem aos dados inseridos
-    assert_eq!(found_book.google_id, book.google_id);
-    assert_eq!(found_book.title, book.title);
-    assert_eq!(found_book.authors, book.authors);
-    assert_eq!(found_book.publisher, book.publisher);
-    assert_eq!(found_book.published_date, book.published_date);
-    assert_eq!(found_book.description, book.description);
-    assert_eq!(found_book.image_url, book.image_url);
-    assert_eq!(found_book.page_count, book.page_count);
+    assert_eq!(found_book.book.google_id, book.google_id);
+    assert_eq!(found_book.book.title, book.title);
+    assert_eq!(found_book.book.authors, book.authors);
+    assert_eq!(found_book.book.publisher, book.publisher);
+    assert_eq!(found_book.book.published_date, book.published_date);
+    assert_eq!(found_book.book.description, book.description);
+    assert_eq!(found_book.book.image_url, book.image_url);
+    assert_eq!(found_book.book.page_count, book.page_count);
 }
 
 #[tokio::test]

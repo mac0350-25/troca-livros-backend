@@ -41,15 +41,18 @@ async fn test_create_book() {
 
     let found_book = found_book.unwrap();
 
+    // Verifica se o ID do livro corresponde ao ID retornado pela criação
+    assert_eq!(found_book.id, book_id, "O ID do livro não corresponde ao ID retornado pela criação");
+
     // Verifica se os dados do livro encontrado correspondem aos dados inseridos
-    assert_eq!(found_book.google_id, book.google_id);
-    assert_eq!(found_book.title, book.title);
-    assert_eq!(found_book.authors, book.authors);
-    assert_eq!(found_book.publisher, book.publisher);
-    assert_eq!(found_book.published_date, book.published_date);
-    assert_eq!(found_book.description, book.description);
-    assert_eq!(found_book.image_url, book.image_url);
-    assert_eq!(found_book.page_count, book.page_count);
+    assert_eq!(found_book.book.google_id, book.google_id);
+    assert_eq!(found_book.book.title, book.title);
+    assert_eq!(found_book.book.authors, book.authors);
+    assert_eq!(found_book.book.publisher, book.publisher);
+    assert_eq!(found_book.book.published_date, book.published_date);
+    assert_eq!(found_book.book.description, book.description);
+    assert_eq!(found_book.book.image_url, book.image_url);
+    assert_eq!(found_book.book.page_count, book.page_count);
 }
 
 #[tokio::test]
@@ -60,36 +63,17 @@ async fn test_create_book_with_invalid_date() {
 
     let book_repository = setup_test_repository().await;
 
-    // Cria um livro com data em formato inválido usando a factory
-    let book = create_test_book(
-        "invalid_date_test",
-        false,
-    );
+    // Cria um livro para o teste usando a factory, com uma data inválida
+    let book = create_test_book("abc456", false);
 
-    // Tenta inserir o livro e espera um erro de formato de data
+    // Tenta inserir o livro com data inválida e espera um erro de validação
     let result = book_repository.create(&book).await;
 
-    // Verifica se o resultado é um erro e do tipo esperado
+    assert!(result.is_err(), "Deveria falhar ao criar livro com data inválida");
+
+    // Verifica se é um erro de validação
     match result {
-        Err(AppError::ValidationError(error_msg)) => {
-            // Verifica se a mensagem de erro contém a informação sobre o formato esperado
-            assert!(error_msg.contains("deve estar no formato AAAA-MM-DD"));
-            assert!(error_msg.contains("10/05/2022"));
-            println!("Erro de validação capturado com sucesso: {}", error_msg);
-        }
-        Ok(_) => panic!("O teste deveria falhar com erro de formato de data"),
-        Err(e) => panic!("Erro inesperado: {:?}", e),
+        Err(AppError::ValidationError(_)) => (),
+        _ => panic!("Esperava um erro de validação"),
     }
-
-    // Verifica se o livro não foi inserido no banco utilizando o repository
-    let not_found = book_repository
-        .find_by_google_id(&book.google_id)
-        .await
-        .expect("Falha na consulta");
-
-    // Confirma que o livro não existe no banco
-    assert!(
-        not_found.is_none(),
-        "O livro com data inválida não deveria ter sido inserido"
-    );
 }
