@@ -3,7 +3,6 @@ mod common;
 use crate::common::test_utils::{get_auth_token, setup_test_app};
 use reqwest::{header, StatusCode};
 use serde_json::{json, Value};
-use uuid::Uuid;
 
 #[tokio::test]
 async fn test_add_book_to_offered() {

@@ -1,5 +1,7 @@
 pub mod add_book_to_offered_test;
 pub mod remove_book_from_offered_test;
+pub mod add_book_to_wanted_test;
+pub mod remove_book_from_wanted_test;
 
 use mockall::{mock, predicate::*};
 use uuid::Uuid;

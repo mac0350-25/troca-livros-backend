@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::error::AppError;
 use crate::models::book::BookOffered;
 use crate::services::book_offered_service::{BookOfferedService, BookOfferedServiceImpl};
-use crate::services::book_offered_service_test::{MockBookRepository, MockBooksOfferedRepository, MockBooksWantedRepository, MockGoogleBookService};
+use crate::services::book_offered_wanted_service_test::{MockBookRepository, MockBooksOfferedRepository, MockBooksWantedRepository, MockGoogleBookService};
 
 #[tokio::test]
 async fn test_remove_book_from_offered() {

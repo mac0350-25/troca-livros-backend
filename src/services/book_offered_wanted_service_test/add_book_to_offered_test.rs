@@ -7,7 +7,7 @@ use crate::error::AppError;
 use crate::models::book::{BookOffered, BookWanted, CreateBookOfferedDto, GoogleBookDto};
 use crate::repositories::book_repository::BookWithId;
 use crate::services::book_offered_service::{BookOfferedService, BookOfferedServiceImpl};
-use crate::services::book_offered_service_test::{MockBookRepository, MockBooksOfferedRepository, MockBooksWantedRepository, MockGoogleBookService};
+use crate::services::book_offered_wanted_service_test::{MockBookRepository, MockBooksOfferedRepository, MockBooksWantedRepository, MockGoogleBookService};
 
 #[tokio::test]
 async fn test_add_book_to_offered_when_book_exists() {
