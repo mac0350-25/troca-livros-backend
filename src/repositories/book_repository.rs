@@ -142,9 +142,9 @@ impl BookRepository for PgBookRepository {
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING id
             "#,
-            book.title,
-            book.authors.clone().unwrap_or_default(),
-            book.description.clone().unwrap_or_default(),
+            &book.title[..book.title.len().min(250)],
+            &book.authors.clone().unwrap_or_default()[..book.authors.clone().unwrap_or_default().len().min(250)],
+            &book.description.clone().unwrap_or_default()[..book.description.clone().unwrap_or_default().len().min(250)],
             book.image_url.clone().unwrap_or_default(),
             book.publisher,
             published_date,

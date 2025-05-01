@@ -1,8 +1,11 @@
 pub mod auth_docs;
+pub mod book_offered_docs;
 pub mod google_book_docs;
 
-use crate::models::book::{BookSearchRequest, GoogleBookDto};
+use crate::handlers::book_offered_handler::AddBookRequest;
+use crate::models::book::{BookOffered, BookSearchRequest, GoogleBookDto};
 use crate::models::user::{CreateUserDto, LoginUserDto, TokenResponse, UserResponse};
+use crate::docs::book_offered_docs::{BookOfferedResponse, SuccessMessage};
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::{Modify, OpenApi};
 
@@ -36,14 +39,28 @@ impl Modify for SecurityAddon {
         crate::docs::auth_docs::register,
         crate::docs::auth_docs::login,
         crate::docs::google_book_docs::search_books,
+        crate::docs::book_offered_docs::add_book_to_offered,
+        crate::docs::book_offered_docs::remove_book_from_offered,
     ),
     components(
-        schemas(CreateUserDto, LoginUserDto, TokenResponse, UserResponse, BookSearchRequest, GoogleBookDto)
+        schemas(
+            CreateUserDto, 
+            LoginUserDto, 
+            TokenResponse, 
+            UserResponse, 
+            BookSearchRequest, 
+            GoogleBookDto, 
+            BookOffered, 
+            AddBookRequest,
+            BookOfferedResponse,
+            SuccessMessage
+        )
     ),
     modifiers(&SecurityAddon),
     tags(
         (name = "auth", description = "API de autenticação"),
-        (name = "google_books", description = "API de livros do Google")
+        (name = "google_books", description = "API de livros do Google"),
+        (name = "books_offered", description = "API de livros oferecidos")
     ),
     info(
         title = "API Troca Livros",

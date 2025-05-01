@@ -1,4 +1,5 @@
 pub mod auth_routes;
+pub mod book_offered_routes;
 pub mod google_book_routes;
 
 use axum::{middleware::from_fn, Router};

@@ -15,7 +15,11 @@ use crate::{
     config::Config,
     docs::ApiDoc,
     repositories::user_repository::PgUserRepository,
-    routes::{auth_routes::auth_routes, google_book_routes::google_book_routes},
+    routes::{
+        auth_routes::auth_routes, 
+        book_offered_routes::book_offered_routes,
+        google_book_routes::google_book_routes
+    },
     services::{auth_service::AuthServiceImpl, password_service::create_password_service},
 };
 
@@ -60,6 +64,7 @@ pub async fn create_app(database_url: &str) -> Router {
     // Definir rotas protegidas (com autenticação)
     let protected_routes = Router::new()
         .merge(google_book_routes())
+        .merge(book_offered_routes(pool.clone()))
         .layer(Extension(auth_service));
 
     // Inicializar o router básico
