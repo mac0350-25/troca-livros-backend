@@ -33,7 +33,7 @@ async fn test_remove_book_from_offered() {
 
     let google_id = books[0]["google_id"].as_str().unwrap();
 
-    // Adicionar o livro à lista de oferecidos
+    // Adicionar o livro à lista de possuídos
     let add_response = client
         .post(&format!("http://localhost:{}/api/books/offered", app.port))
         .header(header::AUTHORIZATION, format!("Bearer {}", token))
@@ -51,7 +51,7 @@ async fn test_remove_book_from_offered() {
 
     let book_id = add_body["data"]["book_id"].as_str().unwrap();
 
-    // Act - Remover o livro da lista de oferecidos
+    // Act - Remover o livro da lista de possuídos
     let response = client
         .delete(&format!(
             "http://localhost:{}/api/books/offered/{}",
@@ -73,7 +73,7 @@ async fn test_remove_book_from_offered() {
     assert_eq!(body["status"], "success");
     assert_eq!(
         body["message"],
-        "Livro removido da lista de oferecidos com sucesso"
+        "Livro removido da lista de possuídos com sucesso"
     );
 
     // Tentar remover o mesmo livro novamente deve falhar
@@ -98,5 +98,5 @@ async fn test_remove_book_from_offered() {
     assert!(second_delete_body["error"]["message"]
         .as_str()
         .unwrap()
-        .contains("não está na sua lista de oferecidos"));
+        .contains("não está na sua lista de possuídos"));
 } 

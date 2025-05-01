@@ -43,7 +43,7 @@ impl BookOfferedHandler {
             StatusCode::CREATED,
             Json(json!({
                 "status": "success",
-                "message": "Livro adicionado à lista de oferecidos com sucesso",
+                "message": "Livro adicionado à lista de possuídos com sucesso",
                 "data": book_offered
             })),
         ))
@@ -62,7 +62,7 @@ impl BookOfferedHandler {
             StatusCode::OK,
             Json(json!({
                     "status": "success",
-                    "message": "Livro removido da lista de oferecidos com sucesso"
+                    "message": "Livro removido da lista de possuídos com sucesso"
             })),
         ))
     }

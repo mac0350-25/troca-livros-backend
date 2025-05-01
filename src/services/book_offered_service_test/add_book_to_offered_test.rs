@@ -41,7 +41,7 @@ async fn test_add_book_to_offered_when_book_exists() {
         });
 
     // Configurar o mock do books_offered_repository para retornar None para find
-    // (indicando que o livro ainda não está na lista de oferecidos)
+    // (indicando que o livro ainda não está na lista de possuídos)
     books_offered_repo
         .expect_find()
         .with(eq(book_id), eq(user_id))
@@ -121,7 +121,7 @@ async fn test_add_book_to_offered_when_book_does_not_exist() {
         .returning(move |_| Ok(book_id));
 
     // Configurar o mock do books_offered_repository para retornar None para find
-    // (indicando que o livro ainda não está na lista de oferecidos)
+    // (indicando que o livro ainda não está na lista de possuídos)
     books_offered_repo
         .expect_find()
         .with(eq(book_id), eq(user_id))
@@ -190,7 +190,7 @@ async fn test_add_book_to_offered_when_book_already_offered() {
         });
 
     // Configurar o mock do books_offered_repository para retornar Some para find
-    // (indicando que o livro já está na lista de oferecidos)
+    // (indicando que o livro já está na lista de possuídos)
     books_offered_repo
         .expect_find()
         .with(eq(book_id), eq(user_id))
@@ -218,7 +218,7 @@ async fn test_add_book_to_offered_when_book_already_offered() {
     assert!(result.is_err());
     match result {
         Err(AppError::ValidationError(msg)) => {
-            assert_eq!(msg, "Este livro já está na sua lista de oferecidos");
+            assert_eq!(msg, "Este livro já está na sua lista de possuídos");
         }
         _ => panic!("Erro inesperado"),
     }

@@ -81,7 +81,7 @@ async fn test_remove_book_from_offered_when_not_offered() {
     assert!(result.is_err());
     match result {
         Err(AppError::ValidationError(msg)) => {
-            assert_eq!(msg, "Este livro não está na sua lista de oferecidos");
+            assert_eq!(msg, "Este livro não está na sua lista de possuídos");
         }
         _ => panic!("Erro inesperado"),
     }

@@ -32,7 +32,7 @@ async fn test_add_book_to_offered() {
 
     let google_id = books[0]["google_id"].as_str().unwrap();
 
-    // Act - Adicionar o livro à lista de oferecidos
+    // Act - Adicionar o livro à lista de possuídos
     let response = client
         .post(&format!("http://localhost:{}/api/books/offered", app.port))
         .header(header::AUTHORIZATION, format!("Bearer {}", token))
@@ -54,7 +54,7 @@ async fn test_add_book_to_offered() {
     assert_eq!(body["status"], "success");
     assert_eq!(
         body["message"],
-        "Livro adicionado à lista de oferecidos com sucesso"
+        "Livro adicionado à lista de possuídos com sucesso"
     );
     assert!(body["data"]["book_id"].is_string());
     assert!(body["data"]["user_id"].is_string());
@@ -81,7 +81,7 @@ async fn test_add_book_to_offered() {
     assert!(duplicate_body["error"]["message"]
         .as_str()
         .unwrap()
-        .contains("já está na sua lista de oferecidos"));
+        .contains("já está na sua lista de possuídos"));
 }
 
 #[tokio::test]

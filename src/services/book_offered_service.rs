@@ -56,33 +56,33 @@ impl BookOfferedService for BookOfferedServiceImpl {
             book_uuid = self.book_repository.create(&book_dto).await?;
         }
         
-        // Verificar se o livro já está na lista de oferecidos do usuário
+        // Verificar se o livro já está na lista de possuídos do usuário
         if let Some(_) = self.books_offered_repository.find(&book_uuid, user_id).await? {
-            return Err(AppError::ValidationError("Este livro já está na sua lista de oferecidos".to_string()));
+            return Err(AppError::ValidationError("Este livro já está na sua lista de possuídos".to_string()));
         }
         
-        // Criar DTO para adicionar à lista de oferecidos
+        // Criar DTO para adicionar à lista de possuídos
         let create_dto = CreateBookOfferedDto {
             book_id: book_uuid,
             user_id: *user_id,
         };
 
-        // Adicionar à lista de livros oferecidos
+        // Adicionar à lista de livros possuídos
         let book_offered = self.books_offered_repository.create(&create_dto).await?;
 
         Ok(book_offered)
     }
 
     async fn remove_book_from_offered(&self, book_id: &Uuid, user_id: &Uuid) -> Result<bool, AppError> {
-        // Verificar se o livro existe na lista de oferecidos do usuário
+        // Verificar se o livro existe na lista de possuídos do usuário
         let exists = self.books_offered_repository.find(book_id, user_id).await?;
         if exists.is_none() {
             return Err(AppError::ValidationError(
-                "Este livro não está na sua lista de oferecidos".to_string(),
+                "Este livro não está na sua lista de possuídos".to_string(),
             ));
         }
 
-        // Remover da lista de livros oferecidos
+        // Remover da lista de livros possuídos
         self.books_offered_repository.delete(book_id, user_id).await
     }
 } 

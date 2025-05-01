@@ -21,7 +21,7 @@ pub struct SuccessMessage {
     pub message: String
 }
 
-/// Adicionar um livro à lista de oferecidos
+/// Adicionar um livro à lista de possuídos
 #[utoipa::path(
     post,
     path = "/api/books/offered",
@@ -40,7 +40,7 @@ pub struct SuccessMessage {
 )]
 pub fn add_book_to_offered() {}
 
-/// Remover um livro da lista de oferecidos
+/// Remover um livro da lista de possuídos
 #[utoipa::path(
     delete,
     path = "/api/books/offered/{book_id}",

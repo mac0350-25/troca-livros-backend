@@ -60,7 +60,7 @@ impl Modify for SecurityAddon {
     tags(
         (name = "auth", description = "API de autenticação"),
         (name = "google_books", description = "API de livros do Google"),
-        (name = "books_offered", description = "API de livros oferecidos")
+        (name = "books_offered", description = "API de livros possuídos")
     ),
     info(
         title = "API Troca Livros",

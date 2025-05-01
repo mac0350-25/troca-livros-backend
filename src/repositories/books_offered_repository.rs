@@ -39,7 +39,7 @@ impl BooksOfferedRepository for PgBooksOfferedRepository {
         .await
         .map_err(|e| {
             if e.to_string().contains("duplicate key") {
-                AppError::ValidationError("Este livro já está na sua lista de oferecidos".to_string())
+                AppError::ValidationError("Este livro já está na sua lista de possuídos".to_string())
             } else if e.to_string().contains("foreign key constraint") {
                 if e.to_string().contains("books_offered_book_id_fkey") {
                     AppError::ValidationError(format!(
