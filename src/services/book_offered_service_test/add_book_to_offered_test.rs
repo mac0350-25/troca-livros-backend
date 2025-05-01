@@ -4,16 +4,17 @@ use mockall::predicate::*;
 use uuid::Uuid;
 
 use crate::error::AppError;
-use crate::models::book::{BookOffered, CreateBookOfferedDto, GoogleBookDto};
+use crate::models::book::{BookOffered, BookWanted, CreateBookOfferedDto, GoogleBookDto};
 use crate::repositories::book_repository::BookWithId;
 use crate::services::book_offered_service::{BookOfferedService, BookOfferedServiceImpl};
-use crate::services::book_offered_service_test::{MockBookRepository, MockBooksOfferedRepository, MockGoogleBookService};
+use crate::services::book_offered_service_test::{MockBookRepository, MockBooksOfferedRepository, MockBooksWantedRepository, MockGoogleBookService};
 
 #[tokio::test]
 async fn test_add_book_to_offered_when_book_exists() {
     // Arrange
     let mut book_repo = MockBookRepository::new();
     let mut books_offered_repo = MockBooksOfferedRepository::new();
+    let mut books_wanted_repo = MockBooksWantedRepository::new();
     
     let google_id = "test123";
     let user_id = Uuid::new_v4();
@@ -39,6 +40,14 @@ async fn test_add_book_to_offered_when_book_exists() {
                 }
             }))
         });
+
+    // Configurar o mock do books_wanted_repository para retornar None para find
+    // (indicando que o livro não está na lista de desejados)
+    books_wanted_repo
+        .expect_find()
+        .with(eq(book_id), eq(user_id))
+        .times(1)
+        .returning(|_, _| Ok(None));
 
     // Configurar o mock do books_offered_repository para retornar None para find
     // (indicando que o livro ainda não está na lista de possuídos)
@@ -69,6 +78,7 @@ async fn test_add_book_to_offered_when_book_exists() {
     let service = BookOfferedServiceImpl::new(
         Arc::new(book_repo),
         Arc::new(books_offered_repo),
+        Arc::new(books_wanted_repo),
         Arc::new(google_book_service),
     );
 
@@ -86,6 +96,7 @@ async fn test_add_book_to_offered_when_book_does_not_exist() {
     // Arrange
     let mut book_repo = MockBookRepository::new();
     let mut books_offered_repo = MockBooksOfferedRepository::new();
+    let mut books_wanted_repo = MockBooksWantedRepository::new();
 
     let google_id = "new_book123";
     let user_id = Uuid::new_v4();
@@ -120,6 +131,14 @@ async fn test_add_book_to_offered_when_book_does_not_exist() {
         .times(1)
         .returning(move |_| Ok(book_id));
 
+    // Configurar o mock do books_wanted_repository para retornar None para find
+    // (indicando que o livro não está na lista de desejados)
+    books_wanted_repo
+        .expect_find()
+        .with(eq(book_id), eq(user_id))
+        .times(1)
+        .returning(|_, _| Ok(None));
+
     // Configurar o mock do books_offered_repository para retornar None para find
     // (indicando que o livro ainda não está na lista de possuídos)
     books_offered_repo
@@ -146,6 +165,7 @@ async fn test_add_book_to_offered_when_book_does_not_exist() {
     let service = BookOfferedServiceImpl::new(
         Arc::new(book_repo),
         Arc::new(books_offered_repo),
+        Arc::new(books_wanted_repo),
         Arc::new(google_book_service),
     );
 
@@ -163,6 +183,7 @@ async fn test_add_book_to_offered_when_book_already_offered() {
     // Arrange
     let mut book_repo = MockBookRepository::new();
     let mut books_offered_repo = MockBooksOfferedRepository::new();
+    let mut books_wanted_repo = MockBooksWantedRepository::new();
 
     let google_id = "already_offered123";
     let user_id = Uuid::new_v4();
@@ -189,6 +210,14 @@ async fn test_add_book_to_offered_when_book_already_offered() {
             }))
         });
 
+    // Configurar o mock do books_wanted_repository para retornar None para find
+    // (indicando que o livro não está na lista de desejados)
+    books_wanted_repo
+        .expect_find()
+        .with(eq(book_id), eq(user_id))
+        .times(1)
+        .returning(|_, _| Ok(None));
+
     // Configurar o mock do books_offered_repository para retornar Some para find
     // (indicando que o livro já está na lista de possuídos)
     books_offered_repo
@@ -209,6 +238,7 @@ async fn test_add_book_to_offered_when_book_already_offered() {
     let service = BookOfferedServiceImpl::new(
         Arc::new(book_repo),
         Arc::new(books_offered_repo),
+        Arc::new(books_wanted_repo),
         Arc::new(google_book_service),
     );
 
@@ -219,6 +249,74 @@ async fn test_add_book_to_offered_when_book_already_offered() {
     match result {
         Err(AppError::ValidationError(msg)) => {
             assert_eq!(msg, "Este livro já está na sua lista de possuídos");
+        }
+        _ => panic!("Erro inesperado"),
+    }
+}
+
+#[tokio::test]
+async fn test_add_book_to_offered_when_book_already_wanted() {
+    // Arrange
+    let mut book_repo = MockBookRepository::new();
+    let mut books_wanted_repo = MockBooksWantedRepository::new();
+    let books_offered_repo = MockBooksOfferedRepository::new();
+
+    let google_id = "already_wanted123";
+    let user_id = Uuid::new_v4();
+    let book_id = Uuid::new_v4();
+
+    // Configurar o mock do book_repository para retornar Some para find_by_google_id
+    book_repo
+        .expect_find_by_google_id()
+        .with(eq(google_id))
+        .times(1)
+        .returning(move |_| {
+            Ok(Some(BookWithId {
+                id: book_id,
+                book: GoogleBookDto {
+                    google_id: google_id.to_string(),
+                    title: "Livro Já Desejado".to_string(),
+                    authors: None,
+                    publisher: None,
+                    published_date: None,
+                    description: None,
+                    image_url: None,
+                    page_count: None,
+                }
+            }))
+        });
+
+    // Configurar o mock do books_wanted_repository para retornar Some para find
+    // (indicando que o livro já está na lista de desejados)
+    books_wanted_repo
+        .expect_find()
+        .with(eq(book_id), eq(user_id))
+        .times(1)
+        .returning(move |book_id, user_id| {
+            Ok(Some(BookWanted {
+                book_id: *book_id,
+                user_id: *user_id,
+            }))
+        });
+
+    // Google Book Service não será usado neste teste
+    let google_book_service = MockGoogleBookService::new();
+
+    // Act
+    let service = BookOfferedServiceImpl::new(
+        Arc::new(book_repo),
+        Arc::new(books_offered_repo),
+        Arc::new(books_wanted_repo),
+        Arc::new(google_book_service),
+    );
+
+    let result = service.add_book_to_offered(google_id, &user_id).await;
+
+    // Assert
+    assert!(result.is_err());
+    match result {
+        Err(AppError::ValidationError(msg)) => {
+            assert_eq!(msg, "Este livro já está na sua lista de desejados");
         }
         _ => panic!("Erro inesperado"),
     }

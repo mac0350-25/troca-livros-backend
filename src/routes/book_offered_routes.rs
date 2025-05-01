@@ -10,7 +10,8 @@ use crate::{
     handlers::book_offered_handler::BookOfferedHandler,
     repositories::{
         book_repository::PgBookRepository, 
-        books_offered_repository::PgBooksOfferedRepository
+        books_offered_repository::PgBooksOfferedRepository,
+        books_wanted_repository::PgBooksWantedRepository
     },
     routes::protect_routes,
     services::{
@@ -24,6 +25,7 @@ pub fn book_offered_routes(pool: Arc<PgPool>) -> Router {
     // Repositórios
     let book_repository = Arc::new(PgBookRepository::new(pool.as_ref().clone()));
     let books_offered_repository = Arc::new(PgBooksOfferedRepository::new(pool.as_ref().clone()));
+    let books_wanted_repository = Arc::new(PgBooksWantedRepository::new(pool.as_ref().clone()));
     
     // Serviço HTTP
     let http_service = Arc::new(HttpServiceImpl::new());
@@ -35,6 +37,7 @@ pub fn book_offered_routes(pool: Arc<PgPool>) -> Router {
     let book_offered_service = Arc::new(BookOfferedServiceImpl::new(
         book_repository,
         books_offered_repository,
+        books_wanted_repository,
         google_book_service,
     ));
 

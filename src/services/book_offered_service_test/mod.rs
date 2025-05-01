@@ -5,7 +5,7 @@ use mockall::{mock, predicate::*};
 use uuid::Uuid;
 
 use crate::error::AppError;
-use crate::models::book::{BookOffered, CreateBookOfferedDto, GoogleBookDto};
+use crate::models::book::{BookOffered, CreateBookOfferedDto, GoogleBookDto, BookWanted};
 use crate::repositories::book_repository::BookWithId;
 
 // Mock para o BookRepository
@@ -28,6 +28,18 @@ mock! {
     impl crate::repositories::books_offered_repository::BooksOfferedRepository for BooksOfferedRepository {
         async fn create(&self, book_offered: &CreateBookOfferedDto) -> Result<BookOffered, AppError>;
         async fn find(&self, book_id: &Uuid, user_id: &Uuid) -> Result<Option<BookOffered>, AppError>;
+        async fn delete(&self, book_id: &Uuid, user_id: &Uuid) -> Result<bool, AppError>;
+    }
+}
+
+// Mock para o BooksWantedRepository
+mock! {
+    pub BooksWantedRepository {}
+
+    #[async_trait::async_trait]
+    impl crate::repositories::books_wanted_repository::BooksWantedRepository for BooksWantedRepository {
+        async fn create(&self, book_wanted: &crate::models::book::CreateBookWantedDto) -> Result<BookWanted, AppError>;
+        async fn find(&self, book_id: &Uuid, user_id: &Uuid) -> Result<Option<BookWanted>, AppError>;
         async fn delete(&self, book_id: &Uuid, user_id: &Uuid) -> Result<bool, AppError>;
     }
 }

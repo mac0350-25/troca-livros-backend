@@ -7,6 +7,7 @@ use crate::error::AppError;
 use crate::models::book::{BookOffered, CreateBookOfferedDto};
 use crate::repositories::book_repository::BookRepository;
 use crate::repositories::books_offered_repository::BooksOfferedRepository;
+use crate::repositories::books_wanted_repository::BooksWantedRepository;
 use crate::services::google_book_service::GoogleBookService;
 
 #[async_trait]
@@ -18,6 +19,7 @@ pub trait BookOfferedService: Send + Sync + 'static {
 pub struct BookOfferedServiceImpl {
     book_repository: Arc<dyn BookRepository>,
     books_offered_repository: Arc<dyn BooksOfferedRepository>,
+    books_wanted_repository: Arc<dyn BooksWantedRepository>,
     google_book_service: Arc<dyn GoogleBookService>,
 }
 
@@ -25,11 +27,13 @@ impl BookOfferedServiceImpl {
     pub fn new(
         book_repository: Arc<dyn BookRepository>,
         books_offered_repository: Arc<dyn BooksOfferedRepository>,
+        books_wanted_repository: Arc<dyn BooksWantedRepository>,
         google_book_service: Arc<dyn GoogleBookService>,
     ) -> Self {
         Self {
             book_repository,
             books_offered_repository,
+            books_wanted_repository,
             google_book_service,
         }
     }
@@ -54,6 +58,11 @@ impl BookOfferedService for BookOfferedServiceImpl {
             
             // Criar o livro no banco de dados
             book_uuid = self.book_repository.create(&book_dto).await?;
+        }
+        
+        // Verificar se o livro já está na lista de desejados do usuário
+        if let Some(_) = self.books_wanted_repository.find(&book_uuid, user_id).await? {
+            return Err(AppError::ValidationError("Este livro já está na sua lista de desejados".to_string()));
         }
         
         // Verificar se o livro já está na lista de possuídos do usuário

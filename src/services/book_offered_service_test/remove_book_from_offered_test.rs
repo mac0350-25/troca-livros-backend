@@ -6,13 +6,14 @@ use uuid::Uuid;
 use crate::error::AppError;
 use crate::models::book::BookOffered;
 use crate::services::book_offered_service::{BookOfferedService, BookOfferedServiceImpl};
-use crate::services::book_offered_service_test::{MockBookRepository, MockBooksOfferedRepository, MockGoogleBookService};
+use crate::services::book_offered_service_test::{MockBookRepository, MockBooksOfferedRepository, MockBooksWantedRepository, MockGoogleBookService};
 
 #[tokio::test]
 async fn test_remove_book_from_offered() {
     // Arrange
     let book_repo = MockBookRepository::new();
     let mut books_offered_repo = MockBooksOfferedRepository::new();
+    let books_wanted_repo = MockBooksWantedRepository::new();
     let google_book_service = MockGoogleBookService::new();
 
     let book_id = Uuid::new_v4();
@@ -41,6 +42,7 @@ async fn test_remove_book_from_offered() {
     let service = BookOfferedServiceImpl::new(
         Arc::new(book_repo),
         Arc::new(books_offered_repo),
+        Arc::new(books_wanted_repo),
         Arc::new(google_book_service),
     );
 
@@ -56,6 +58,7 @@ async fn test_remove_book_from_offered_when_not_offered() {
     // Arrange
     let book_repo = MockBookRepository::new();
     let mut books_offered_repo = MockBooksOfferedRepository::new();
+    let books_wanted_repo = MockBooksWantedRepository::new();
     let google_book_service = MockGoogleBookService::new();
 
     let book_id = Uuid::new_v4();
@@ -72,6 +75,7 @@ async fn test_remove_book_from_offered_when_not_offered() {
     let service = BookOfferedServiceImpl::new(
         Arc::new(book_repo),
         Arc::new(books_offered_repo),
+        Arc::new(books_wanted_repo),
         Arc::new(google_book_service),
     );
 
