@@ -115,11 +115,11 @@ async fn test_delete_books_wanted_multiple_users() {
 
     // Verifica se foi removido para o usuário 1
     let find_result1 = books_wanted_repository.find(&book_id, &user1.id).await.unwrap();
-    assert!(find_result1.is_none(), "O livro não deveria mais estar oferecido pelo usuário 1");
+    assert!(find_result1.is_none(), "O livro não deveria mais estar possuído pelo usuário 1");
 
     // Verifica se ainda existe para o usuário 2
     let find_result2 = books_wanted_repository.find(&book_id, &user2.id).await.unwrap();
-    assert!(find_result2.is_some(), "O livro ainda deveria estar oferecido pelo usuário 2");
+    assert!(find_result2.is_some(), "O livro ainda deveria estar possuído pelo usuário 2");
 }
 
 #[tokio::test]
@@ -165,9 +165,9 @@ async fn test_delete_books_wanted_multiple_books() {
 
     // Verifica se o livro 1 foi removido
     let find_result1 = books_wanted_repository.find(&book1_id, &user.id).await.unwrap();
-    assert!(find_result1.is_none(), "O livro 1 não deveria mais estar oferecido");
+    assert!(find_result1.is_none(), "O livro 1 não deveria mais estar possuído");
 
     // Verifica se o livro 2 ainda existe
     let find_result2 = books_wanted_repository.find(&book2_id, &user.id).await.unwrap();
-    assert!(find_result2.is_some(), "O livro 2 ainda deveria estar oferecido");
+    assert!(find_result2.is_some(), "O livro 2 ainda deveria estar possuído");
 } 

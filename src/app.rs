@@ -18,6 +18,7 @@ use crate::{
     routes::{
         auth_routes::auth_routes, 
         book_offered_routes::book_offered_routes,
+        book_wanted_routes::book_wanted_routes,
         google_book_routes::google_book_routes
     },
     services::{auth_service::AuthServiceImpl, password_service::create_password_service},
@@ -65,6 +66,7 @@ pub async fn create_app(database_url: &str) -> Router {
     let protected_routes = Router::new()
         .merge(google_book_routes())
         .merge(book_offered_routes(pool.clone()))
+        .merge(book_wanted_routes(pool.clone()))
         .layer(Extension(auth_service));
 
     // Inicializar o router básico

@@ -5,7 +5,7 @@ use reqwest::{header, StatusCode};
 use serde_json::{json, Value};
 
 #[tokio::test]
-async fn test_add_book_to_offered() {
+async fn test_add_book_to_wanted() {
     // Arrange - Configurar o aplicativo de teste e autenticar
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;
@@ -32,9 +32,9 @@ async fn test_add_book_to_offered() {
 
     let google_id = books[0]["google_id"].as_str().unwrap();
 
-    // Act - Adicionar o livro à lista de possuídos
+    // Act - Adicionar o livro à lista de desejados
     let response = client
-        .post(&format!("http://localhost:{}/api/books/offered", app.port))
+        .post(&format!("http://localhost:{}/api/books/wanted", app.port))
         .header(header::AUTHORIZATION, format!("Bearer {}", token))
         .json(&json!({
             "google_id": google_id
@@ -54,14 +54,14 @@ async fn test_add_book_to_offered() {
     assert_eq!(body["status"], "success");
     assert_eq!(
         body["message"],
-        "Livro adicionado à lista de possuídos com sucesso"
+        "Livro adicionado à lista de desejados com sucesso"
     );
     assert!(body["data"]["book_id"].is_string());
     assert!(body["data"]["user_id"].is_string());
 
     // Tentar adicionar o mesmo livro novamente deve falhar
     let duplicate_response = client
-        .post(&format!("http://localhost:{}/api/books/offered", app.port))
+        .post(&format!("http://localhost:{}/api/books/wanted", app.port))
         .header(header::AUTHORIZATION, format!("Bearer {}", token))
         .json(&json!({
             "google_id": google_id
@@ -81,11 +81,11 @@ async fn test_add_book_to_offered() {
     assert!(duplicate_body["error"]["message"]
         .as_str()
         .unwrap()
-        .contains("já está na sua lista de possuídos"));
+        .contains("já está na sua lista de desejados"));
 }
 
 #[tokio::test]
-async fn test_add_book_to_offered_invalid_google_id() {
+async fn test_add_book_to_wanted_invalid_google_id() {
     // Arrange - Configurar o aplicativo de teste e autenticar
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;
@@ -93,7 +93,7 @@ async fn test_add_book_to_offered_invalid_google_id() {
 
     // Act - Tentar adicionar um livro com ID inválido
     let response = client
-        .post(&format!("http://localhost:{}/api/books/offered", app.port))
+        .post(&format!("http://localhost:{}/api/books/wanted", app.port))
         .header(header::AUTHORIZATION, format!("Bearer {}", token))
         .json(&json!({
             "google_id": "id_que_nao_existe_12345"
@@ -108,14 +108,14 @@ async fn test_add_book_to_offered_invalid_google_id() {
 }
 
 #[tokio::test]
-async fn test_add_book_to_offered_without_authentication() {
+async fn test_add_book_to_wanted_without_authentication() {
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();
 
     // Act - Tentar adicionar um livro sem autenticação
     let response = client
-        .post(&format!("http://localhost:{}/api/books/offered", app.port))
+        .post(&format!("http://localhost:{}/api/books/wanted", app.port))
         .json(&json!({
             "google_id": "qualquerid"
         }))
@@ -138,9 +138,9 @@ async fn test_add_book_to_offered_without_authentication() {
         .contains("Token de autenticação ausente"));
 }
 
-// Teste para verificar erro ao tentar adicionar livro que já está na lista de desejados
+// Teste para verificar erro ao tentar adicionar livro que já está na lista de possuídos
 #[tokio::test]
-async fn test_add_book_to_offered_already_in_wanted() {
+async fn test_add_book_to_wanted_already_in_offered() {
     // Arrange - Configurar o aplicativo de teste e autenticar
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;
@@ -167,9 +167,9 @@ async fn test_add_book_to_offered_already_in_wanted() {
 
     let google_id = books[0]["google_id"].as_str().unwrap();
 
-    // Adicionar à lista de desejados 
-    let wanted_response = client
-        .post(&format!("http://localhost:{}/api/books/wanted", app.port))
+    // Adicionar à lista de possuídos 
+    let offered_response = client
+        .post(&format!("http://localhost:{}/api/books/offered", app.port))
         .header(header::AUTHORIZATION, format!("Bearer {}", token))
         .json(&json!({
             "google_id": google_id
@@ -177,19 +177,19 @@ async fn test_add_book_to_offered_already_in_wanted() {
         .send()
         .await;
 
-    // Garantir que o livro foi adicionado à lista de desejados
-    assert_eq!(wanted_response.unwrap().status(), StatusCode::CREATED);
+    // Garantir que o livro foi adicionado à lista de possuídos
+    assert_eq!(offered_response.unwrap().status(), StatusCode::CREATED);
 
-    // Act - Tentar adicionar o mesmo livro à list de possuídos
+    // Act - Tentar adicionar o mesmo livro à lista de desejados
     let response = client
-        .post(&format!("http://localhost:{}/api/books/offered", app.port))
+        .post(&format!("http://localhost:{}/api/books/wanted", app.port))
         .header(header::AUTHORIZATION, format!("Bearer {}", token))
         .json(&json!({
             "google_id": google_id
         }))
         .send()
         .await
-        .expect("Falha ao enviar requisição para adicionar livro à lista de possuídos");
+        .expect("Falha ao enviar requisição para adicionar livro à lista de desejados");
 
     // Assert - Verificar que a requisição falhou com o erro esperado
     let status = response.status();
@@ -203,5 +203,5 @@ async fn test_add_book_to_offered_already_in_wanted() {
     assert!(body["error"]["message"]
         .as_str()
         .unwrap()
-        .contains("já está na sua lista de desejados"));
+        .contains("já está na sua lista de possuídos"));
 }

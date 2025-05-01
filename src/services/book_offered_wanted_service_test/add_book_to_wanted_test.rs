@@ -199,7 +199,7 @@ async fn test_add_book_to_wanted_when_book_already_wanted() {
                 id: book_id,
                 book: GoogleBookDto {
                     google_id: google_id.to_string(),
-                    title: "Livro Já Oferecido".to_string(),
+                    title: "Livro Já Possuído".to_string(),
                     authors: None,
                     publisher: None,
                     published_date: None,

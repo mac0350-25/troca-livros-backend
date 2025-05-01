@@ -1,11 +1,13 @@
 pub mod auth_docs;
 pub mod book_offered_docs;
 pub mod google_book_docs;
+pub mod book_wanted_docs;
 
 use crate::handlers::book_offered_handler::AddBookRequest;
 use crate::models::book::{BookOffered, BookSearchRequest, GoogleBookDto};
 use crate::models::user::{CreateUserDto, LoginUserDto, TokenResponse, UserResponse};
-use crate::docs::book_offered_docs::{BookOfferedResponse, SuccessMessage};
+use crate::docs::book_offered_docs::{BookOfferedResponse, SuccessMessage as OfferedSuccessMessage};
+use crate::docs::book_wanted_docs::{BookWantedResponse, SuccessMessage as WantedSuccessMessage};
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::{Modify, OpenApi};
 
@@ -41,6 +43,8 @@ impl Modify for SecurityAddon {
         crate::docs::google_book_docs::search_books,
         crate::docs::book_offered_docs::add_book_to_offered,
         crate::docs::book_offered_docs::remove_book_from_offered,
+        crate::docs::book_wanted_docs::add_book_to_wanted,
+        crate::docs::book_wanted_docs::remove_book_from_wanted,
     ),
     components(
         schemas(
@@ -53,14 +57,17 @@ impl Modify for SecurityAddon {
             BookOffered, 
             AddBookRequest,
             BookOfferedResponse,
-            SuccessMessage
+            BookWantedResponse,
+            OfferedSuccessMessage,
+            WantedSuccessMessage
         )
     ),
     modifiers(&SecurityAddon),
     tags(
         (name = "auth", description = "API de autenticação"),
-        (name = "google_books", description = "API de livros do Google"),
-        (name = "books_offered", description = "API de livros possuídos")
+        (name = "books", description = "API de livros do Google"),
+        (name = "books_offered", description = "API de livros possuídos"),
+        (name = "books_wanted", description = "API de livros desejados")
     ),
     info(
         title = "API Troca Livros",

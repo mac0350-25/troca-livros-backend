@@ -140,17 +140,17 @@ async fn test_find_books_wanted_multiple_entries() {
 
     // Teste 1: Usuário 1 oferece o Livro 1
     let result1 = books_wanted_repository.find(&book1_id, &user1.id).await.unwrap();
-    assert!(result1.is_some(), "Usuário 1 deveria ter o Livro 1 como oferecido");
+    assert!(result1.is_some(), "Usuário 1 deveria ter o Livro 1 como possuído");
     
     // Teste 2: Usuário 1 oferece o Livro 2
     let result2 = books_wanted_repository.find(&book2_id, &user1.id).await.unwrap();
-    assert!(result2.is_some(), "Usuário 1 deveria ter o Livro 2 como oferecido");
+    assert!(result2.is_some(), "Usuário 1 deveria ter o Livro 2 como possuído");
     
     // Teste 3: Usuário 2 oferece o Livro 1
     let result3 = books_wanted_repository.find(&book1_id, &user2.id).await.unwrap();
-    assert!(result3.is_some(), "Usuário 2 deveria ter o Livro 1 como oferecido");
+    assert!(result3.is_some(), "Usuário 2 deveria ter o Livro 1 como possuído");
     
     // Teste 4: Usuário 2 NÃO oferece o Livro 2
     let result4 = books_wanted_repository.find(&book2_id, &user2.id).await.unwrap();
-    assert!(result4.is_none(), "Usuário 2 não deveria ter o Livro 2 como oferecido");
+    assert!(result4.is_none(), "Usuário 2 não deveria ter o Livro 2 como possuído");
 } 
