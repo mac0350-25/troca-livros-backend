@@ -25,8 +25,21 @@ pub struct BookOffered {
     pub user_id: Uuid,
 }
 
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct BookWanted {
+    pub book_id: Uuid,
+    pub user_id: Uuid,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateBookOfferedDto {
     pub book_id: Uuid,
     pub user_id: Uuid,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CreateBookWantedDto {
+    pub book_id: Uuid,
+    pub user_id: Uuid,
+}
+
