@@ -19,6 +19,7 @@ mock! {
         async fn create(&self, book: &GoogleBookDto) -> Result<Uuid, AppError>;
         async fn find_by_google_id(&self, google_id: &str) -> Result<Option<BookWithId>, AppError>;
         async fn find_by_id(&self, id: &str) -> Result<Option<GoogleBookDto>, AppError>;
+        async fn find_by_ids(&self, ids: &[String]) -> Result<Vec<BookWithId>, AppError>;
     }
 }
 
