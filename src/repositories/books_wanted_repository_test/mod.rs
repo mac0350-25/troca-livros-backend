@@ -1,6 +1,7 @@
 pub mod create_books_wanted_test;
 pub mod find_books_wanted_test;
 pub mod delete_books_wanted_test;
+pub mod find_by_user_id_test;
 
 use crate::models::book::GoogleBookDto;
 use crate::models::user::CreateUserDto;

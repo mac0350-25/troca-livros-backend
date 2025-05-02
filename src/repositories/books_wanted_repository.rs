@@ -10,6 +10,7 @@ pub trait BooksWantedRepository: Send + Sync + 'static {
     async fn create(&self, book_wanted: &CreateBookWantedDto) -> Result<BookWanted, AppError>;
     async fn find(&self, book_id: &Uuid, user_id: &Uuid) -> Result<Option<BookWanted>, AppError>;
     async fn delete(&self, book_id: &Uuid, user_id: &Uuid) -> Result<bool, AppError>;
+    async fn find_by_user_id(&self, user_id: &Uuid) -> Result<Vec<Uuid>, AppError>;
 }
 
 pub struct PgBooksWantedRepository {
@@ -100,5 +101,21 @@ impl BooksWantedRepository for PgBooksWantedRepository {
 
         // Retorna true se algo foi excluído, false caso contrário
         Ok(result.rows_affected() > 0)
+    }
+
+    async fn find_by_user_id(&self, user_id: &Uuid) -> Result<Vec<Uuid>, AppError> {
+        let result = sqlx::query!(
+            r#"
+            SELECT book_id
+            FROM books_wanted
+            WHERE user_id = $1
+            "#,
+            user_id
+        )
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|e| AppError::DatabaseError(e.to_string()))?;
+
+        Ok(result.into_iter().map(|r| r.book_id).collect())
     }
 } 

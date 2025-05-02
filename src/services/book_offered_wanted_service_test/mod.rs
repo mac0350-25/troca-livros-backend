@@ -44,6 +44,7 @@ mock! {
         async fn create(&self, book_wanted: &crate::models::book::CreateBookWantedDto) -> Result<BookWanted, AppError>;
         async fn find(&self, book_id: &Uuid, user_id: &Uuid) -> Result<Option<BookWanted>, AppError>;
         async fn delete(&self, book_id: &Uuid, user_id: &Uuid) -> Result<bool, AppError>;
+        async fn find_by_user_id(&self, user_id: &Uuid) -> Result<Vec<Uuid>, AppError>;
     }
 }
 
