@@ -1,11 +1,15 @@
 mod common;
 
-use crate::common::test_utils::{get_auth_token, setup_test_app};
+use crate::common::test_utils::{get_auth_token, get_test_mutex, setup_test_app};
 use reqwest::{header, StatusCode};
 use serde_json::{json, Value};
 
 #[tokio::test]
 async fn test_add_book_to_offered() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange - Configurar o aplicativo de teste e autenticar
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;
@@ -86,6 +90,10 @@ async fn test_add_book_to_offered() {
 
 #[tokio::test]
 async fn test_add_book_to_offered_invalid_google_id() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange - Configurar o aplicativo de teste e autenticar
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;
@@ -109,6 +117,10 @@ async fn test_add_book_to_offered_invalid_google_id() {
 
 #[tokio::test]
 async fn test_add_book_to_offered_without_authentication() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();
@@ -141,6 +153,10 @@ async fn test_add_book_to_offered_without_authentication() {
 // Teste para verificar erro ao tentar adicionar livro que já está na lista de desejados
 #[tokio::test]
 async fn test_add_book_to_offered_already_in_wanted() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange - Configurar o aplicativo de teste e autenticar
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;

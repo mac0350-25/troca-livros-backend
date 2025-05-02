@@ -31,6 +31,7 @@ mock! {
         async fn create(&self, book_offered: &CreateBookOfferedDto) -> Result<BookOffered, AppError>;
         async fn find(&self, book_id: &Uuid, user_id: &Uuid) -> Result<Option<BookOffered>, AppError>;
         async fn delete(&self, book_id: &Uuid, user_id: &Uuid) -> Result<bool, AppError>;
+        async fn find_by_user_id(&self, user_id: &Uuid) -> Result<Vec<Uuid>, AppError>;
     }
 }
 
