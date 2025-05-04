@@ -1,12 +1,16 @@
 mod common;
 
-use crate::common::test_utils::{get_auth_token, setup_test_app};
+use crate::common::test_utils::{get_auth_token, get_test_mutex, setup_test_app};
 use reqwest::{header, StatusCode};
 use serde_json::{json, Value};
 
 
 #[tokio::test]
 async fn test_remove_book_from_offered() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange - Configurar o aplicativo de teste e autenticar
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;
@@ -17,7 +21,7 @@ async fn test_remove_book_from_offered() {
         .post(&format!("http://localhost:{}/api/books/search", app.port))
         .header(header::AUTHORIZATION, format!("Bearer {}", token))
         .json(&json!({
-            "query": "Domain-Driven Design"
+            "query": "Clean Code"
         }))
         .send()
         .await

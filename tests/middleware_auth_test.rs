@@ -1,11 +1,15 @@
 mod common;
 
-use crate::common::test_utils::{get_auth_token, setup_test_app};
+use crate::common::test_utils::{get_auth_token, get_test_mutex, setup_test_app};
 use reqwest::{header, StatusCode};
 use serde_json::{json, Value};
 
 #[tokio::test]
 async fn test_auth_middleware_token_expiration() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();
@@ -41,6 +45,10 @@ async fn test_auth_middleware_token_expiration() {
 
 #[tokio::test]
 async fn test_auth_middleware_malformed_token() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();
@@ -76,6 +84,10 @@ async fn test_auth_middleware_malformed_token() {
 
 #[tokio::test]
 async fn test_auth_middleware_missing_bearer() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;
@@ -109,6 +121,10 @@ async fn test_auth_middleware_missing_bearer() {
 
 #[tokio::test]
 async fn test_auth_middleware_access_multiple_protected_routes() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;

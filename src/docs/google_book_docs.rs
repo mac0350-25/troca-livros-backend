@@ -16,7 +16,7 @@
     security(
         ("bearerAuth" = [])
     ),
-    tag = "books"
+    tag = "google_books"
 )]
 #[allow(unused)]
 pub fn search_books() {

@@ -1,11 +1,24 @@
 use reqwest::Client;
 use serde_json::{json, Value};
 use std::net::TcpListener;
+use std::sync::Arc;
+use tokio::sync::{Mutex, OnceCell};
 use troca_livros_api::app;
 use uuid::Uuid;
 
 pub struct TestApp {
     pub port: u16,
+}
+
+// Mutex global para garantir que apenas um teste end-to-end execute por vez
+static TEST_MUTEX: OnceCell<Arc<Mutex<()>>> = OnceCell::const_new();
+
+/// Retorna um mutex para garantir a execução sequencial dos testes
+pub async fn get_test_mutex() -> Arc<Mutex<()>> {
+    TEST_MUTEX
+        .get_or_init(|| async { Arc::new(Mutex::new(())) })
+        .await
+        .clone()
 }
 
 /// Configura um aplicativo de teste com um banco de dados de teste
