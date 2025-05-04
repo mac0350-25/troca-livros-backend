@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
-#[derive(Debug, Serialize, ToSchema)]
+use uuid::Uuid;
+
+#[derive(Debug, Serialize, ToSchema, Clone)]
 pub struct GoogleBookDto {
     pub google_id: String,
     pub title: String,
@@ -16,3 +18,28 @@ pub struct GoogleBookDto {
 pub struct BookSearchRequest {
     pub query: String,
 }
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct BookOffered {
+    pub book_id: Uuid,
+    pub user_id: Uuid,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct BookWanted {
+    pub book_id: Uuid,
+    pub user_id: Uuid,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CreateBookOfferedDto {
+    pub book_id: Uuid,
+    pub user_id: Uuid,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CreateBookWantedDto {
+    pub book_id: Uuid,
+    pub user_id: Uuid,
+}
+

@@ -2,7 +2,7 @@ use crate::{
     error::AppError,
     models::user::CreateUserDto,
     repositories::{
-        test_helpers::{clean_database, get_test_db_pool},
+        test_helpers::{get_test_db_pool, get_test_mutex},
         user_repository::{PgUserRepository, UserRepository},
     },
 };
@@ -11,17 +11,17 @@ use uuid::Uuid;
 async fn setup_test_repository() -> PgUserRepository {
     // Obtém o pool de conexão com o banco de dados de teste
     let pool = get_test_db_pool().await;
-
-    // Limpa as tabelas antes de executar os testes
-    clean_database(&pool).await;
-
+    
     // Criamos o DatabasePool com o pool real
     PgUserRepository::new(pool)
 }
 
 #[tokio::test]
 async fn test_create_user() {
-    let repo = setup_test_repository().await;
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+
+    let user_repository = setup_test_repository().await;
 
     let user = CreateUserDto {
         name: "Test User".to_string(),
@@ -32,7 +32,7 @@ async fn test_create_user() {
     // Hash simulado para testes
     let hash_password = "hashed_password_for_test".to_string();
 
-    let created_user = repo
+    let created_user = user_repository
         .create(&user, hash_password.clone())
         .await
         .expect("Falha ao criar usuário");
@@ -45,7 +45,10 @@ async fn test_create_user() {
 
 #[tokio::test]
 async fn test_find_by_email() {
-    let repo = setup_test_repository().await;
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+
+    let user_repository = setup_test_repository().await;
 
     // Cria um usuário para teste
     let user = CreateUserDto {
@@ -56,13 +59,13 @@ async fn test_find_by_email() {
     let hash_password = "hashed_password_for_test".to_string();
 
     // Insere o usuário no banco
-    let created_user = repo
+    let created_user = user_repository
         .create(&user, hash_password.clone())
         .await
         .expect("Falha ao criar usuário");
 
     // Testa a busca por email com email existente
-    let found_user_opt = repo
+    let found_user_opt = user_repository
         .find_by_email("find_by_email@example.com")
         .await
         .expect("Falha ao buscar usuário pelo email");
@@ -75,7 +78,7 @@ async fn test_find_by_email() {
     assert_eq!(found_user.name, "Email Test");
 
     // Testa a busca por email com email inexistente
-    let non_existent_result = repo
+    let non_existent_result = user_repository
         .find_by_email("nonexistent@example.com")
         .await
         .expect("Falha ao buscar usuário pelo email");
@@ -85,7 +88,10 @@ async fn test_find_by_email() {
 
 #[tokio::test]
 async fn test_email_exists() {
-    let repo = setup_test_repository().await;
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+
+    let user_repository = setup_test_repository().await;
 
     // Cria um usuário para teste
     let user = CreateUserDto {
@@ -96,12 +102,12 @@ async fn test_email_exists() {
     let hash_password = "hashed_password_for_test".to_string();
 
     // Insere o usuário no banco
-    repo.create(&user, hash_password.clone())
+    user_repository.create(&user, hash_password.clone())
         .await
         .expect("Falha ao criar usuário");
 
     // Verifica se email existe através de find_by_email para testar a funcionalidade
-    let found_user = repo
+    let found_user = user_repository
         .find_by_email("email_exists@example.com")
         .await
         .expect("Falha ao buscar usuário pelo email");
@@ -109,7 +115,7 @@ async fn test_email_exists() {
     assert!(found_user.is_some());
 
     // Verifica que email inexistente retorna None
-    let not_found = repo
+    let not_found = user_repository
         .find_by_email("nonexistent@example.com")
         .await
         .expect("Falha ao buscar usuário pelo email");
@@ -119,7 +125,10 @@ async fn test_email_exists() {
 
 #[tokio::test]
 async fn test_duplicate_email() {
-    let repo = setup_test_repository().await;
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+
+    let user_repository = setup_test_repository().await;
 
     // Cria um primeiro usuário
     let user1 = CreateUserDto {
@@ -130,7 +139,7 @@ async fn test_duplicate_email() {
     let hash_password = "hashed_password_for_test".to_string();
 
     // Insere o primeiro usuário
-    repo.create(&user1, hash_password.clone())
+    user_repository.create(&user1, hash_password.clone())
         .await
         .expect("Falha ao criar primeiro usuário");
 
@@ -142,7 +151,7 @@ async fn test_duplicate_email() {
     };
 
     // Deve falhar com erro de validação
-    let result = repo.create(&user2, "another_hash".to_string()).await;
+    let result = user_repository.create(&user2, "another_hash".to_string()).await;
     assert!(result.is_err());
 
     // Verifica se é o tipo de erro esperado

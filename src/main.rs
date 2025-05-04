@@ -1,15 +1,5 @@
-pub mod app;
-mod config;
-mod docs;
-mod error;
-mod handlers;
-mod middleware;
-mod models;
-mod repositories;
-mod routes;
-mod services;
-
-use crate::config::Config;
+use troca_livros_api::app;
+use troca_livros_api::config::Config;
 use std::net::{SocketAddr, TcpListener};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 

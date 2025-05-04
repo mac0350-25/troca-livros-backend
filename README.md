@@ -43,6 +43,24 @@ Backend do projeto **Troca Livros**, desenvolvido em **Rust** utilizando o frame
    docker compose down -v
    ```
 
+### 🔄 Atualizando o Esquema do Banco de Dados
+
+Quando você fizer alterações no arquivo `postgres/setup.sql`, para que essas alterações sejam aplicadas ao banco de dados:
+
+1. Pare os contêineres:
+   ```sh
+   docker compose down
+   ```
+
+2. Inicie os contêineres novamente para aplicar as alterações:
+   ```sh
+   docker compose up -d --build
+   ```
+
+O script `setup.sql` será executado automaticamente em cada inicialização do contêiner, atualizando o esquema do banco de dados conforme necessário.
+
+> **Nota**: Se você quiser preservar os dados existentes ao atualizar o esquema, não use a flag `-v` ao parar os contêineres. Apenas para reinicialização completa com banco vazio: `docker compose down -v`
+
 ---
 
 ## 🏛 Estrutura do Banco de Dados
@@ -68,6 +86,10 @@ O banco de dados contém as seguintes tabelas:
 - Para resolver problemas de permissão:
   ```sh
   chmod -R 777 ./postgres
+  ```
+- Se as alterações no esquema não estiverem sendo aplicadas, tente reiniciar completamente:
+  ```sh
+  docker compose down -v && docker compose up -d --build
   ```
 
 ---

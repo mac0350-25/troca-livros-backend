@@ -7,6 +7,7 @@ use axum::{
     response::Response,
 };
 use jsonwebtoken::{decode, DecodingKey, Validation};
+use uuid::Uuid;
 
 use crate::{
     config::Config,
@@ -20,9 +21,9 @@ pub async fn auth_middleware<B>(
     next: Next<B>,
 ) -> Result<Response, AppError> {
     // Verificar a existência do token de autenticação no header Authorization
-    let auth_header = request
-        .headers()
-        .get(header::AUTHORIZATION)
+    let headers = request.headers();
+    let auth_header = headers.get(header::AUTHORIZATION);
+    let auth_header = auth_header
         .and_then(|header| header.to_str().ok())
         .ok_or_else(|| AppError::AuthError("Token de autenticação ausente".to_string()))?;
 
@@ -47,8 +48,10 @@ pub async fn auth_middleware<B>(
     )
     .map_err(|e| AppError::AuthError(format!("Token inválido: {}", e)))?;
 
-    // Extrair o user_id do token
-    let user_id = token_data.claims.sub;
+    // Extrair o user_id do token e converter para Uuid
+    let user_id_str = token_data.claims.sub;
+    let user_id = Uuid::parse_str(&user_id_str)
+        .map_err(|_| AppError::AuthError("ID de usuário inválido no token".to_string()))?;
 
     // Adicionar o user_id aos extensions para que as rotas possam acessá-lo
     request.extensions_mut().insert(user_id);
