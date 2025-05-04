@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::error::AppError;
@@ -8,7 +10,7 @@ use crate::repositories::book_repository::{BookRepository, BookWithId};
 use crate::repositories::books_offered_repository::BooksOfferedRepository;
 use crate::repositories::books_wanted_repository::BooksWantedRepository;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct UserBooks {
     pub offered_books: Vec<BookWithId>,
     pub wanted_books: Vec<BookWithId>,

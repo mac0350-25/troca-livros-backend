@@ -2,11 +2,13 @@ use crate::models::book::GoogleBookDto;
 use chrono::NaiveDate;
 use sqlx::PgPool;
 use async_trait::async_trait;
+use serde::{Serialize, Deserialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
 use crate::error::AppError;
 
 // Estender GoogleBookDto para incluir o id do banco de dados
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct BookWithId {
     pub id: Uuid,
     pub book: GoogleBookDto,
