@@ -1,0 +1,2 @@
+# Ignora todos os arquivos HTML de cobertura de testes
+*.html linguist-generated=true
