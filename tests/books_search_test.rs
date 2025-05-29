@@ -1,11 +1,15 @@
 mod common;
 
-use crate::common::test_utils::{get_auth_token, setup_test_app};
+use crate::common::test_utils::{get_auth_token, get_test_mutex, setup_test_app};
 use reqwest::{header, StatusCode};
 use serde_json::{json, Value};
 
 #[tokio::test]
 async fn test_search_books_success() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange - Configurar o aplicativo de teste e autenticar
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;
@@ -51,6 +55,10 @@ async fn test_search_books_success() {
 
 #[tokio::test]
 async fn test_search_books_without_authentication() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();
@@ -82,6 +90,10 @@ async fn test_search_books_without_authentication() {
 
 #[tokio::test]
 async fn test_search_books_with_invalid_token() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();
@@ -117,7 +129,11 @@ async fn test_search_books_with_invalid_token() {
 
 #[tokio::test]
 async fn test_search_books_empty_query() {
-    // Arrange
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
+    // Arrange - Configurar o aplicativo de teste e autenticar
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;
     let client = reqwest::Client::new();
@@ -150,6 +166,10 @@ async fn test_search_books_empty_query() {
 
 #[tokio::test]
 async fn test_search_books_specific_book() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;
@@ -197,6 +217,10 @@ async fn test_search_books_specific_book() {
 
 #[tokio::test]
 async fn test_search_books_nonexistent_title() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;
@@ -234,6 +258,10 @@ async fn test_search_books_nonexistent_title() {
 
 #[tokio::test]
 async fn test_search_books_with_author_filter() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let token = get_auth_token(&app).await;

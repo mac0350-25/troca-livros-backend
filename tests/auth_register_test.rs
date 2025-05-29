@@ -1,11 +1,15 @@
 mod common;
 
-use crate::common::test_utils::setup_test_app;
+use crate::common::test_utils::{get_test_mutex, setup_test_app};
 use reqwest::StatusCode;
 use serde_json::{json, Value};
 
 #[tokio::test]
 async fn test_register_user_success() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange - Configurar o aplicativo de teste
     let app = setup_test_app().await;
     let client = reqwest::Client::new();
@@ -42,6 +46,10 @@ async fn test_register_user_success() {
 
 #[tokio::test]
 async fn test_register_user_invalid_email() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();
@@ -75,6 +83,10 @@ async fn test_register_user_invalid_email() {
 
 #[tokio::test]
 async fn test_register_user_password_too_short() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();
@@ -108,6 +120,10 @@ async fn test_register_user_password_too_short() {
 
 #[tokio::test]
 async fn test_register_user_duplicate_email() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();

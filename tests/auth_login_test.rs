@@ -1,11 +1,15 @@
 mod common;
 
-use crate::common::test_utils::setup_test_app;
+use crate::common::test_utils::{get_test_mutex, setup_test_app};
 use reqwest::StatusCode;
 use serde_json::{json, Value};
 
 #[tokio::test]
 async fn test_login_success() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();
@@ -58,6 +62,10 @@ async fn test_login_success() {
 
 #[tokio::test]
 async fn test_login_invalid_credentials() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();
@@ -110,6 +118,10 @@ async fn test_login_invalid_credentials() {
 
 #[tokio::test]
 async fn test_login_nonexistent_user() {
+    // Usa mutex para garantir execução sequencial dos testes
+    let mutex = get_test_mutex().await;
+    let _lock = mutex.lock().await;
+    
     // Arrange
     let app = setup_test_app().await;
     let client = reqwest::Client::new();

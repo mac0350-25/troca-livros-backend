@@ -2,6 +2,7 @@ pub mod create_book_test;
 pub mod find_book_by_google_id_test;
 pub mod find_by_google_id_test;
 pub mod find_by_id_test;
+pub mod find_by_ids_test;
 
 use crate::models::book::GoogleBookDto;
 use crate::repositories::book_repository::PgBookRepository;
