@@ -21,13 +21,17 @@ pub struct BookSearchRequest {
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct BookOffered {
+    #[schema(value_type = String, format = "uuid")]
     pub book_id: Uuid,
+    #[schema(value_type = String, format = "uuid")]
     pub user_id: Uuid,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct BookWanted {
+    #[schema(value_type = String, format = "uuid")]
     pub book_id: Uuid,
+    #[schema(value_type = String, format = "uuid")]
     pub user_id: Uuid,
 }
 

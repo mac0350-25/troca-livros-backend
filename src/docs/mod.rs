@@ -3,10 +3,13 @@ pub mod book_docs;
 pub mod book_offered_docs;
 pub mod google_book_docs;
 pub mod book_wanted_docs;
+pub mod trade_docs;
 
 use crate::handlers::book_offered_handler::AddBookRequest;
-use crate::models::book::{BookOffered, BookSearchRequest, GoogleBookDto};
+use crate::models::book::{BookOffered, BookWanted, BookSearchRequest, GoogleBookDto};
 use crate::models::user::{CreateUserDto, LoginUserDto, TokenResponse, UserResponse};
+use crate::models::trade::PossibleTrade;
+use crate::error::AppError;
 use crate::docs::book_docs::UserBooksResponse;
 use crate::docs::book_offered_docs::{BookOfferedResponse, SuccessMessage as OfferedSuccessMessage};
 use crate::docs::book_wanted_docs::{BookWantedResponse, SuccessMessage as WantedSuccessMessage};
@@ -49,6 +52,7 @@ impl Modify for SecurityAddon {
         crate::docs::book_offered_docs::remove_book_from_offered,
         crate::docs::book_wanted_docs::add_book_to_wanted,
         crate::docs::book_wanted_docs::remove_book_from_wanted,
+        crate::docs::trade_docs::get_possible_trades,
     ),
     components(
         schemas(
@@ -59,13 +63,16 @@ impl Modify for SecurityAddon {
             BookSearchRequest, 
             GoogleBookDto, 
             BookOffered, 
+            BookWanted,
             AddBookRequest,
             BookOfferedResponse,
             BookWantedResponse,
             UserBooksResponse,
             UserBooks,
             OfferedSuccessMessage,
-            WantedSuccessMessage
+            WantedSuccessMessage,
+            PossibleTrade,
+            AppError
         )
     ),
     modifiers(&SecurityAddon),
@@ -74,7 +81,8 @@ impl Modify for SecurityAddon {
         (name = "books", description = "API de livros do usuário"),
         (name = "google_books", description = "API de livros do Google"),
         (name = "books_offered", description = "API de livros possuídos"),
-        (name = "books_wanted", description = "API de livros desejados")
+        (name = "books_wanted", description = "API de livros desejados"),
+        (name = "trades", description = "API de trocas de livros")
     ),
     info(
         title = "API Troca Livros",

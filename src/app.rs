@@ -20,9 +20,13 @@ use crate::{
         book_offered_routes::book_offered_routes,
         book_routes::book_routes,
         book_wanted_routes::book_wanted_routes,
-        google_book_routes::google_book_routes
+        google_book_routes::google_book_routes,
+        trade_routes::trade_routes,
     },
-    services::{auth_service::AuthServiceImpl, password_service::create_password_service},
+    services::{
+        auth_service::AuthServiceImpl, 
+        password_service::create_password_service,
+    },
 };
 
 /// Configura e retorna o pool de conexão com o banco de dados
@@ -69,6 +73,7 @@ pub async fn create_app(database_url: &str) -> Router {
         .merge(book_offered_routes(pool.clone()))
         .merge(book_wanted_routes(pool.clone()))
         .merge(book_routes(pool.clone()))
+        .merge(trade_routes(pool.clone()))
         .layer(Extension(auth_service));
 
     // Inicializar o router básico

@@ -3,6 +3,7 @@ pub mod book_offered_routes;
 pub mod book_routes;
 pub mod book_wanted_routes;
 pub mod google_book_routes;
+pub mod trade_routes;
 
 use axum::{middleware::from_fn, Router};
 

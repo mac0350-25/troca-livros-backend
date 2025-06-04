@@ -3,10 +3,12 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
+use serde::{Serialize, Deserialize};
 use serde_json::json;
 use thiserror::Error;
+use utoipa::ToSchema;
 
-#[derive(Error, Debug, Clone)]
+#[derive(Error, Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub enum AppError {
     #[error("Erro de autenticação: {0}")]
     AuthError(String),

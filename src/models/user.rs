@@ -6,12 +6,12 @@ use uuid::Uuid;
 use validator::Validate;
 use validator::{validate_email, ValidationError};
 
-#[derive(Debug, FromRow, Serialize)]
+#[derive(Debug, FromRow, Serialize, Deserialize, Clone)]
 pub struct User {
     pub id: Uuid,
     pub name: String,
     pub email: String,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     pub hash_password: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -89,7 +89,7 @@ impl LoginUserDto {
     }
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, Clone, ToSchema)]
 pub struct UserResponse {
     /// ID único do usuário
     #[schema(value_type = String, format = "uuid")]
@@ -106,7 +106,7 @@ pub struct UserResponse {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, Clone, ToSchema)]
 pub struct TokenResponse {
     /// Token JWT de acesso
     pub access_token: String,
