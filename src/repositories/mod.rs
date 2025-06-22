@@ -2,6 +2,7 @@ pub mod book_repository;
 pub mod user_repository;
 pub mod books_offered_repository;
 pub mod books_wanted_repository;
+pub mod trade_repository;
 #[cfg(test)]
 pub mod user_repository_test;
 
@@ -13,6 +14,8 @@ pub mod books_offered_repository_test;
 
 #[cfg(test)]
 pub mod books_wanted_repository_test;
+#[cfg(test)]
+pub mod trade_repository_test;
 #[cfg(test)]
 pub mod test_helpers {
     use dotenv::dotenv;
